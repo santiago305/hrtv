@@ -13,10 +13,27 @@ export function Header({ navItems, logoUrl }: HeaderProps) {
     const { url } = usePage();
     const visibleItems = navItems.filter((item) => item.visible);
 
-    const isActive = (path: string) => {
-        if (path === '/') return url === '/';
+    const normalizePath = (value: string) => {
+        if (!value) return '/';
 
-        return url === path || url.startsWith(`${path}?`) || url.startsWith(`${path}/`);
+        return value
+            .replace(/^https?:\/\/[^/]+/i, '')
+            .replace(/\/+$/, '') || '/';
+    };
+
+    const isActive = (path: string) => {
+        const currentUrl = normalizePath(url);
+        const currentPath = normalizePath(path);
+
+        if (currentPath === '/') {
+            return currentUrl === '/';
+        }
+
+        return (
+            currentUrl === currentPath ||
+            currentUrl.startsWith(`${currentPath}/`) ||
+            currentUrl.startsWith(`${currentPath}?`)
+        );
     };
 
     const isFewItems = visibleItems.length <= 2;
@@ -49,11 +66,15 @@ export function Header({ navItems, logoUrl }: HeaderProps) {
                                     key={item.path}
                                     href={item.path}
                                     className={`relative px-3 py-1.5 text-sm font-medium transition-colors ${
-                                        isActive(item.path) ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                                        isActive(item.path)
+                                            ? 'text-primary'
+                                            : 'text-muted-foreground hover:text-foreground'
                                     }`}
                                 >
                                     {item.label}
-                                    {isActive(item.path) && <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-primary" />}
+                                    {isActive(item.path) && (
+                                        <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-primary" />
+                                    )}
                                 </Link>
                             ))}
                         </nav>
@@ -85,7 +106,9 @@ export function Header({ navItems, logoUrl }: HeaderProps) {
                                 href={item.path}
                                 onClick={() => setMobileOpen(false)}
                                 className={`px-3 py-2 text-sm font-medium transition-colors ${
-                                    isActive(item.path) ? 'bg-primary/5 text-primary' : 'text-muted-foreground hover:text-foreground'
+                                    isActive(item.path)
+                                        ? 'bg-primary/5 text-primary'
+                                        : 'text-muted-foreground hover:text-foreground'
                                 }`}
                             >
                                 {item.label}
