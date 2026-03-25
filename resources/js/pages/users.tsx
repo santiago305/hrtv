@@ -5,7 +5,7 @@ import type { DataTableColumn } from '@/components/table/types';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { LoaderCircle, Shield, UserPlus, Users } from 'lucide-react';
 
 type Role = {
@@ -25,6 +25,11 @@ type UserItem = {
 
 type PageProps = {
     users: UserItem[];
+    usersPagination: {
+        page: number;
+        limit: number;
+        total: number;
+    };
     roles: Role[];
     flash?: {
         success?: string;
@@ -43,7 +48,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function UsersIndex() {
-    const { users, roles, flash } = usePage<PageProps>().props;
+    const { users, usersPagination, roles, flash } = usePage<PageProps>().props;
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -98,7 +103,7 @@ export default function UsersIndex() {
                             <Users className="h-5 w-5" />
                         </div>
                         <p className="text-sm text-black/60">Total de usuarios</p>
-                        <p className="mt-1 text-3xl font-semibold text-black">{users.length}</p>
+                        <p className="mt-1 text-3xl font-semibold text-black">{usersPagination.total}</p>
                     </div>
 
                     <div className="rounded-2xl border border-black/10 bg-white p-5">
@@ -210,6 +215,17 @@ export default function UsersIndex() {
                             tableId="users-dashboard-table"
                             rowKey={(user) => String(user.id)}
                             emptyMessage="No hay usuarios creados todavia."
+                            pagination={usersPagination}
+                            onPageChange={(page) => {
+                                router.get(
+                                    route('users.index'),
+                                    { page },
+                                    {
+                                        preserveState: true,
+                                        preserveScroll: true,
+                                    },
+                                );
+                            }}
                             striped
                             selectableColumns
                             animated={false}

@@ -14,23 +14,31 @@ class UserController extends Controller
 {
     public function index(): Response
     {
+        $users = User::query()
+            ->with('role')
+            ->latest()
+            ->paginate(20)
+            ->withQueryString()
+            ->through(fn (User $user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role ? [
+                    'id' => $user->role->id,
+                    'name' => $user->role->name,
+                    'slug' => $user->role->slug,
+                ] : null,
+                'email_verified_at' => $user->email_verified_at,
+                'created_at' => $user->created_at?->toDateTimeString(),
+            ]);
+
         return Inertia::render('users', [
-            'users' => User::query()
-                ->with('role')
-                ->latest()
-                ->get()
-                ->map(fn (User $user) => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'role' => $user->role ? [
-                        'id' => $user->role->id,
-                        'name' => $user->role->name,
-                        'slug' => $user->role->slug,
-                    ] : null,
-                    'email_verified_at' => $user->email_verified_at,
-                    'created_at' => $user->created_at?->toDateTimeString(),
-                ]),
+            'users' => $users->items(),
+            'usersPagination' => [
+                'page' => $users->currentPage(),
+                'limit' => $users->perPage(),
+                'total' => $users->total(),
+            ],
             'roles' => Role::query()
                 ->orderBy('name')
                 ->get(['id', 'name', 'slug']),

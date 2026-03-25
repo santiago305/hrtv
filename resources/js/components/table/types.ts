@@ -1,16 +1,29 @@
 import type { MouseEvent, ReactNode } from 'react';
 
+export type DataTablePinned = 'left' | 'right';
+
 export type DataTableColumn<T> = {
     id: string;
     header: string;
     accessorKey?: keyof T;
     cell?: (row: T, index: number) => ReactNode;
+    cardCell?: (row: T, index: number) => ReactNode;
     className?: string;
     headerClassName?: string;
     visible?: boolean;
     hideable?: boolean;
+    width?: string;
     clickable?: boolean;
     onCellClick?: (row: T, index: number, event: MouseEvent<HTMLElement>) => void;
+    searchable?: boolean;
+    searchValue?: (row: T) => string;
+    sortable?: boolean;
+    sortAccessor?: keyof T | ((row: T) => string | number | boolean | Date | null | undefined);
+    pinned?: DataTablePinned;
+    lockPosition?: boolean;
+    showInCards?: boolean;
+    cardLabel?: string;
+    cardTitle?: boolean;
 };
 
 export type DataTablePaginationMeta = {
@@ -19,11 +32,24 @@ export type DataTablePaginationMeta = {
     total: number;
 };
 
+export type DataTableSelectionChangeMeta<T> = {
+    selectedRows: T[];
+    selectedKeys: string[];
+};
+
+export type DataTableSortDirection = 'asc' | 'desc';
+
+export type DataTableSortState =
+    | {
+          columnId: string;
+          direction: DataTableSortDirection;
+      }
+    | null;
+
 export type DataTableProps<T> = {
     data: T[];
     columns: DataTableColumn<T>[];
     tableId: string;
-    selectableColumns?: boolean;
     loading?: boolean;
     emptyMessage?: string;
     rowKey?: keyof T | ((row: T, index: number) => string);
@@ -37,4 +63,32 @@ export type DataTableProps<T> = {
     onRowClick?: (row: T, index: number) => void;
     rowClickable?: boolean;
     rowClassName?: (row: T, index: number) => string | undefined;
+    selectableColumns?: boolean;
+    showSearch?: boolean;
+    searchPlaceholder?: string;
+    searchValue?: string;
+    onSearchChange?: (value: string) => void;
+    globalSearchFn?: (row: T, query: string) => boolean;
+    stickyHeader?: boolean;
+    responsiveCards?: boolean;
+    selectableRows?: boolean;
+    selectedRowKeys?: string[];
+    defaultSelectedRowKeys?: string[];
+    onSelectedRowKeysChange?: (selectedKeys: string[], meta: DataTableSelectionChangeMeta<T>) => void;
+    initialSort?: DataTableSortState;
+    controlledSort?: DataTableSortState;
+    onSortChange?: (sort: DataTableSortState) => void;
+};
+
+export type DataTableColumnPreference = {
+    visibleColumnIds: string[];
+    orderedColumnIds: string[];
+};
+
+export type DataTableColumnManagerItem = {
+    id: string;
+    header: string;
+    hideable?: boolean;
+    pinned?: DataTablePinned;
+    lockPosition?: boolean;
 };
