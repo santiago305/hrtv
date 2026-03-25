@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,11 +14,49 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $adminRole = Role::query()->updateOrCreate(
+            ['slug' => 'admin'],
+            ['name' => 'Administrador']
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        $moderatorRole = Role::query()->updateOrCreate(
+            ['slug' => 'moderator'],
+            ['name' => 'Moderador']
+        );
+
+        $writerRole = Role::query()->updateOrCreate(
+            ['slug' => 'writer'],
+            ['name' => 'Redactor']
+        );
+
+        User::query()->updateOrCreate(
+            ['email' => 'administracion@hrtv.com.pe'],
+            [
+                'name' => 'Administracion HRTV',
+                'role_id' => $adminRole->id,
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+            ]
+        );
+
+        User::query()->updateOrCreate(
+            ['email' => 'moderador@hrtv.com.pe'],
+            [
+                'name' => 'Moderador HRTV',
+                'role_id' => $moderatorRole->id,
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+            ]
+        );
+
+        User::query()->updateOrCreate(
+            ['email' => 'redaccion@hrtv.com.pe'],
+            [
+                'name' => 'Redaccion HRTV',
+                'role_id' => $writerRole->id,
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+            ]
+        );
     }
 }
