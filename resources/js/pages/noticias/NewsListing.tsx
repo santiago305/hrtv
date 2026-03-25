@@ -1,4 +1,4 @@
-import PublicSiteLayout from '@/components/public-site-layout';
+import PublicSiteLayout from '@/layouts/public-site-layout';
 import { Link } from '@inertiajs/react';
 
 interface NewsItem {
