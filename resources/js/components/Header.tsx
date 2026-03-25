@@ -20,14 +20,18 @@ export function Header({ navItems, logoUrl }: HeaderProps) {
     };
 
     const isFewItems = visibleItems.length <= 2;
+    const currentLogoUrl = logoUrl ?? '/storage/logo.png';
 
     return (
         <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
             <div className="container-main">
                 <div className="flex h-14 items-center justify-between">
                     <Link href={route('home')} className="flex items-center gap-2">
-                        {logoUrl ? (
-                            <img src={logoUrl} alt="HRTV" className="h-8" />
+                        {currentLogoUrl ? (
+                            <div className="flex items-center gap-1.5">
+                                <img src={currentLogoUrl} alt="HRTV" className="h-10 w-auto object-contain" />
+                                <span className="text-lg font-bold tracking-tight text-foreground">HRTV</span>
+                            </div>
                         ) : (
                             <div className="flex items-center gap-1.5">
                                 <div className="flex h-8 w-8 items-center justify-center bg-primary">
