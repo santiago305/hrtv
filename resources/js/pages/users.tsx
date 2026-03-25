@@ -1,5 +1,7 @@
 import { FloatingInput } from '@/components/FloatingInput';
 import { FloatingSelect } from '@/components/FloatingSelect';
+import { DataTable } from '@/components/table/DataTable';
+import type { DataTableColumn } from '@/components/table/types';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
@@ -49,6 +51,41 @@ export default function UsersIndex() {
         password_confirmation: '',
         role_id: roles[0] ? String(roles[0].id) : '',
     });
+
+    const columns: DataTableColumn<UserItem>[] = [
+        {
+            id: 'name',
+            header: 'Nombre',
+            accessorKey: 'name',
+            className: 'font-medium text-black',
+            hideable: false,
+        },
+        {
+            id: 'email',
+            header: 'Correo',
+            accessorKey: 'email',
+        },
+        {
+            id: 'role',
+            header: 'Rol',
+            cell: (user) => (
+                <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                    {user.role?.name ?? 'Sin rol'}
+                </span>
+            ),
+        },
+        {
+            id: 'status',
+            header: 'Estado',
+            cell: (user) => (user.email_verified_at ? 'Activo' : 'Pendiente'),
+        },
+        {
+            id: 'created_at',
+            header: 'Creado',
+            accessorKey: 'created_at',
+            cell: (user) => user.created_at ?? '-',
+        },
+    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -167,34 +204,16 @@ export default function UsersIndex() {
                             </div>
                         </div>
 
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-black/10">
-                                <thead>
-                                    <tr className="text-left text-sm text-black/55">
-                                        <th className="px-4 py-3 font-medium">Nombre</th>
-                                        <th className="px-4 py-3 font-medium">Correo</th>
-                                        <th className="px-4 py-3 font-medium">Rol</th>
-                                        <th className="px-4 py-3 font-medium">Estado</th>
-                                        <th className="px-4 py-3 font-medium">Creado</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-black/5">
-                                    {users.map((user) => (
-                                        <tr key={user.id} className="text-sm text-black/75">
-                                            <td className="px-4 py-4 font-medium text-black">{user.name}</td>
-                                            <td className="px-4 py-4">{user.email}</td>
-                                            <td className="px-4 py-4">
-                                                <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                                                    {user.role?.name ?? 'Sin rol'}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-4">{user.email_verified_at ? 'Activo' : 'Pendiente'}</td>
-                                            <td className="px-4 py-4">{user.created_at ?? '-'}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                        <DataTable
+                            data={users}
+                            columns={columns}
+                            tableId="users-dashboard-table"
+                            rowKey={(user) => String(user.id)}
+                            emptyMessage="No hay usuarios creados todavia."
+                            striped
+                            selectableColumns
+                            animated={false}
+                        />
                     </div>
                 </section>
             </div>
