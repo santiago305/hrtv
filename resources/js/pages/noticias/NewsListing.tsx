@@ -54,7 +54,7 @@ export default function NewsListingPage() {
             <button
               type="button"
               onClick={() => updateFilters({})}
-              className={`flex-shrink-0 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
+              className={`shrink-0 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
                 !activeCategory
                   ? 'bg-primary text-primary-foreground'
                   : 'border border-border text-muted-foreground hover:text-foreground'
@@ -67,7 +67,7 @@ export default function NewsListingPage() {
                 key={cat.id}
                 type="button"
                 onClick={() => handleCategoryClick(cat.slug)}
-                className={`flex-shrink-0 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                className={`shrink-0 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
                   activeCategory === cat.slug
                     ? 'bg-primary text-primary-foreground'
                     : 'border border-border text-muted-foreground hover:text-foreground'

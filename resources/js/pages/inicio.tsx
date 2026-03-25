@@ -22,7 +22,7 @@ function HeroCarousel() {
   const article = heroArticles[current];
 
   return (
-    <section className="relative h-[60vh] min-h-[400px] max-h-[600px] overflow-hidden bg-surface-alt">
+    <section className="relative h-[60vh] min-h-100 max-h-150 overflow-hidden bg-surface-alt">
       {heroArticles.map((a, i) => (
         <div
           key={a.id}
@@ -31,7 +31,7 @@ function HeroCarousel() {
           }`}
         >
           <img src={a.image} alt={a.title} className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-surface-alt/95 via-surface-alt/60 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-r from-surface-alt/95 via-surface-alt/60 to-transparent" />
         </div>
       ))}
 
@@ -197,7 +197,7 @@ function LiveStreamSection() {
             </h3>
             {otherStreams.map((stream) => (
               <div key={stream.id} className="group flex cursor-pointer gap-3">
-                <div className="relative h-16 w-28 flex-shrink-0 overflow-hidden">
+                <div className="relative h-16 w-28 shrink-0 overflow-hidden">
                   <img
                     src={stream.thumbnailUrl}
                     alt={stream.title}
