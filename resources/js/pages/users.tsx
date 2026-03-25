@@ -213,6 +213,8 @@ export default function UsersIndex() {
                             data={users}
                             columns={columns}
                             tableId="users-dashboard-table"
+                            showSearch
+                            searchPlaceholder="Buscar usuarios..."
                             rowKey={(user) => String(user.id)}
                             emptyMessage="No hay usuarios creados todavia."
                             pagination={usersPagination}
