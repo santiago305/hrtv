@@ -450,7 +450,7 @@ export function Popover({
           {!hideHeader && (title || description || showCloseButton) && (
             <div
               className={cn(
-                "flex items-start justify-between gap-3 border-b border-border px-3 py-2",
+                "flex items-start justify-between gap-3 px-3 py-2",
                 headerClassName
               )}
             >

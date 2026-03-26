@@ -112,6 +112,12 @@ export function Modal({
           exit: { opacity: 0, scale: 0.985, y: 8 },
         };
 
+  const handleBackdropClick = () => {
+    if (closeOnOverlayClick && canClose) {
+      onClose();
+    }
+  };
+
   return (
     <AnimatePresence>
       {open && (
@@ -126,11 +132,6 @@ export function Modal({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => {
-                if (closeOnOverlayClick && canClose) {
-                  onClose();
-                }
-              }}
             />
           )}
 
@@ -139,6 +140,7 @@ export function Modal({
               "relative flex min-h-full w-full items-center justify-center p-4 sm:p-6",
               containerClassName
             )}
+            onClick={handleBackdropClick}
           >
             <motion.div
               role="dialog"
@@ -148,7 +150,7 @@ export function Modal({
               transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
                 "relative flex h-auto max-h-[calc(100vh-2rem)] w-auto max-w-[calc(100vw-2rem)] flex-col overflow-hidden",
-                "rounded-2xl border border-border bg-background text-foreground",
+                "rounded-xl border border-border bg-background",
                 "shadow-[0_20px_50px_-18px_rgba(0,0,0,0.22)] dark:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)]",
                 className
               )}
@@ -157,7 +159,7 @@ export function Modal({
               {!hideHeader && (title || description || showCloseButton) && (
                 <div
                   className={cn(
-                    "flex items-start justify-between gap-4 border-b border-border bg-muted/40 px-5 py-4",
+                    "flex items-start justify-between gap-4 border-b border-border bg-muted/40 px-3 py-3",
                     headerClassName
                   )}
                 >
@@ -165,7 +167,7 @@ export function Modal({
                     {title && (
                       <h2
                         className={cn(
-                          "text-[17px] font-semibold tracking-tight text-foreground",
+                          "text-sm font-semibold tracking-tight text-foreground",
                           titleClassName
                         )}
                       >
@@ -190,19 +192,21 @@ export function Modal({
                       type="button"
                       onClick={onClose}
                       className={cn(
-                        "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground transition-colors",
+                        "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-xl bg-background text-muted-foreground transition-colors cursor-pointer",
                         "hover:bg-muted hover:text-foreground",
                         closeButtonClassName
                       )}
                       aria-label="Cerrar modal"
                     >
-                      <span className="text-base leading-none">×</span>
+                      <span className="text-base leading-none">Ã—</span>
                     </button>
                   )}
                 </div>
               )}
 
-              <div className={cn("scroll-y-stable flex-1 px-5 py-5", bodyClassName)}>{children}</div>
+              <div className={cn("scroll-y-stable flex-1 px-5 py-5", bodyClassName)}>
+                {children}
+              </div>
 
               {footer && (
                 <div
