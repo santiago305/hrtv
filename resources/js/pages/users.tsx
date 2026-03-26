@@ -1,3 +1,4 @@
+import { ActionsPopover, type ActionItem } from '@/components/ActionsPopover';
 import { FloatingInput } from '@/components/FloatingInput';
 import { FloatingSelect } from '@/components/FloatingSelect';
 import { SystemButton } from '@/components/SystemButton';
@@ -59,10 +60,6 @@ export default function UsersIndex() {
         role_id: roles[0] ? String(roles[0].id) : '',
     });
 
-    const activeUsers = users.filter((user) => user.is_active).length;
-    const inactiveUsers = users.filter((user) => !user.is_active).length;
-    const verifiedUsers = users.filter((user) => !!user.email_verified_at).length;
-
     const columns: DataTableColumn<UserItem>[] = [
         {
             id: 'name',
@@ -106,17 +103,18 @@ export default function UsersIndex() {
             header: 'Acciones',
             hideable: false,
             searchable: false,
+            className: 'flex justify-center items-center',
             sortable: false,
-            className: 'w-[220px]',
             cardLabel: 'Acciones',
-            cell: (user) => (
-                <div className="flex items-center gap-2">
-                    <SystemButton
-                        type="button"
-                        size="sm"
-                        variant={user.is_active ? 'outline' : 'primary'}
-                        leftIcon={user.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-                        onClick={() =>
+            cell: (user) => {
+                const actions: ActionItem[] = [
+                    {
+                        id: 'toggle-status',
+                        label: user.is_active ? 'Desactivar' : 'Activar',
+                        icon: user.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />,
+                        danger: user.is_active,
+                        className: user.is_active ? 'hover:bg-red-50/80' : 'hover:bg-primary/5',
+                        onClick: () =>
                             router.patch(
                                 route('users.toggle-status', user.id),
                                 { page: usersPagination.page },
@@ -124,25 +122,35 @@ export default function UsersIndex() {
                                     preserveScroll: true,
                                     preserveState: true,
                                 },
-                            )
-                        }
-                    >
-                        {user.is_active ? 'Desactivar' : 'Activar'}
-                    </SystemButton>
+                            ),
+                    },
+                    {
+                        id: 'edit',
+                        label: 'Editar',
+                        icon: <Pencil className="h-4 w-4" />,
+                        disabled: true,
+                        className: 'opacity-60',
+                    },
+                ];
 
-                    <SystemButton type="button" size="sm" variant="secondary" leftIcon={<Pencil className="h-4 w-4" />} disabled>
-                        Editar
-                    </SystemButton>
-                </div>
-            ),
-            cardCell: (user) => (
-                <div className="flex justify-end gap-2">
-                    <SystemButton
-                        type="button"
-                        size="sm"
-                        variant={user.is_active ? 'outline' : 'primary'}
-                        leftIcon={user.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-                        onClick={() =>
+                return (
+                    <ActionsPopover
+                        actions={actions}
+                        columns={1}
+                        compact
+                        triggerVariant="outline"
+                    />
+                );
+            },
+            cardCell: (user) => {
+                const actions: ActionItem[] = [
+                    {
+                        id: 'toggle-status',
+                        label: user.is_active ? 'Desactivar' : 'Activar',
+                        icon: user.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />,
+                        danger: user.is_active,
+                        className: user.is_active ? 'hover:bg-red-50/80' : 'hover:bg-primary/5',
+                        onClick: () =>
                             router.patch(
                                 route('users.toggle-status', user.id),
                                 { page: usersPagination.page },
@@ -150,17 +158,28 @@ export default function UsersIndex() {
                                     preserveScroll: true,
                                     preserveState: true,
                                 },
-                            )
-                        }
-                    >
-                        {user.is_active ? 'Desactivar' : 'Activar'}
-                    </SystemButton>
+                            ),
+                    },
+                    {
+                        id: 'edit',
+                        label: 'Editar',
+                        icon: <Pencil className="h-4 w-4" />,
+                        disabled: true,
+                        className: 'opacity-60',
+                    },
+                ];
 
-                    <SystemButton type="button" size="sm" variant="secondary" leftIcon={<Pencil className="h-4 w-4" />} disabled>
-                        Editar
-                    </SystemButton>
-                </div>
-            ),
+                return (
+                    <div className="flex justify-end">
+                        <ActionsPopover
+                            actions={actions}
+                            columns={1}
+                            compact
+                            triggerVariant="outline"
+                        />
+                    </div>
+                );
+            },
         },
     ];
 
@@ -170,39 +189,6 @@ export default function UsersIndex() {
 
             <div className="container-main py-4 text-xs sm:py-6">
                 <div className="flex flex-col gap-6">
-                    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                        <div className="rounded-2xl border border-border bg-white px-4 py-4">
-                            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                <Users className="h-5 w-5" />
-                            </div>
-                            <p className="text-xs font-medium text-black/55">Total usuarios</p>
-                            <p className="mt-1 text-2xl font-semibold text-black">{usersPagination.total}</p>
-                        </div>
-
-                        <div className="rounded-2xl border border-border bg-white px-4 py-4">
-                            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-                                <UserCheck className="h-5 w-5" />
-                            </div>
-                            <p className="text-xs font-medium text-black/55">Activos</p>
-                            <p className="mt-1 text-2xl font-semibold text-black">{activeUsers}</p>
-                        </div>
-
-                        <div className="rounded-2xl border border-border bg-white px-4 py-4">
-                            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-200 text-slate-700">
-                                <UserX className="h-5 w-5" />
-                            </div>
-                            <p className="text-xs font-medium text-black/55">Inactivos</p>
-                            <p className="mt-1 text-2xl font-semibold text-black">{inactiveUsers}</p>
-                        </div>
-
-                        <div className="rounded-2xl border border-border bg-white px-4 py-4">
-                            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
-                                <Users className="h-5 w-5" />
-                            </div>
-                            <p className="text-xs font-medium text-black/55">Verificados</p>
-                            <p className="mt-1 text-2xl font-semibold text-black">{verifiedUsers}</p>
-                        </div>
-                    </section>
 
                     <section className="grid grid-cols-1 gap-6 lg:grid-cols-12">
                         <div className="lg:col-span-4 2xl:col-span-3">

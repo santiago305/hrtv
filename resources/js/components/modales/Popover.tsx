@@ -433,7 +433,7 @@ export function Popover({
           role="dialog"
           aria-modal="false"
           className={cn(
-            "fixed z-50 flex max-h-[calc(100vh-1rem)] min-w-[22rem] max-w-[calc(100vw-1rem)] flex-col overflow-hidden",
+            "fixed z-50 flex max-h-[calc(100vh-1rem)] min-w-88 max-w-[calc(100vw-1rem)] flex-col overflow-hidden",
             "rounded-2xl border border-zinc-200/80 bg-white",
             "shadow-[0_16px_40px_-16px_rgba(0,0,0,0.22)]",
             transformOriginClass,
@@ -450,7 +450,7 @@ export function Popover({
           {!hideHeader && (title || description || showCloseButton) && (
             <div
               className={cn(
-                "flex items-start justify-between gap-3 border-b border-zinc-100 bg-zinc-50/70 px-4 py-3",
+                "flex items-start justify-between gap-3 py-2 px-3",
                 headerClassName
               )}
             >
@@ -458,7 +458,7 @@ export function Popover({
                 {title && (
                   <h3
                     className={cn(
-                      "text-sm font-semibold tracking-tight text-zinc-900",
+                      "text-[9px] tracking-tight text-zinc-900",
                       titleClassName
                     )}
                   >
@@ -496,7 +496,7 @@ export function Popover({
 
           <div
             className={cn(
-              "scroll-y-stable overflow-y-auto px-4 py-4",
+              "scroll-y-stable overflow-y-auto px-2 pb-2",
               bodyClassName
             )}
           >
