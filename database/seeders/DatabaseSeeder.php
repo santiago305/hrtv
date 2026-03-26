@@ -35,6 +35,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Administracion HRTV',
                 'role_id' => $adminRole->id,
                 'email_verified_at' => now(),
+                'is_active' => true,
                 'password' => Hash::make('password'),
             ]
         );
@@ -45,6 +46,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Moderador HRTV',
                 'role_id' => $moderatorRole->id,
                 'email_verified_at' => now(),
+                'is_active' => true,
                 'password' => Hash::make('password'),
             ]
         );
@@ -55,6 +57,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Redaccion HRTV',
                 'role_id' => $writerRole->id,
                 'email_verified_at' => now(),
+                'is_active' => true,
                 'password' => Hash::make('password'),
             ]
         );

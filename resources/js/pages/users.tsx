@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { LoaderCircle, Shield, UserPlus, Users } from 'lucide-react';
+import { LoaderCircle, Pencil, Shield, UserCheck, UserPlus, UserX, Users } from 'lucide-react';
 
 type Role = {
     id: number;
@@ -19,6 +19,7 @@ type UserItem = {
     name: string;
     email: string;
     role: Role | null;
+    is_active: boolean;
     email_verified_at: string | null;
     created_at: string | null;
 };
@@ -82,13 +83,86 @@ export default function UsersIndex() {
         {
             id: 'status',
             header: 'Estado',
-            cell: (user) => (user.email_verified_at ? 'Activo' : 'Pendiente'),
+            cell: (user) => (
+                <span
+                    className={
+                        user.is_active
+                            ? 'inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700'
+                            : 'inline-flex rounded-full bg-slate-200 px-3 py-1 text-xs font-medium text-slate-700'
+                    }
+                >
+                    {user.is_active ? 'Activo' : 'Inactivo'}
+                </span>
+            ),
         },
         {
             id: 'created_at',
             header: 'Creado',
             accessorKey: 'created_at',
             cell: (user) => user.created_at ?? '-',
+        },
+        {
+            id: 'actions',
+            header: 'Acciones',
+            hideable: false,
+            searchable: false,
+            sortable: false,
+            className: 'w-[220px]',
+            cardLabel: 'Acciones',
+            cell: (user) => (
+                <div className="flex items-center gap-2">
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant={user.is_active ? 'outline' : 'default'}
+                        onClick={() =>
+                            router.patch(
+                                route('users.toggle-status', user.id),
+                                { page: usersPagination.page },
+                                {
+                                    preserveScroll: true,
+                                    preserveState: true,
+                                },
+                            )
+                        }
+                    >
+                        {user.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                        {user.is_active ? 'Desactivar' : 'Activar'}
+                    </Button>
+
+                    <Button type="button" size="sm" variant="secondary" disabled>
+                        <Pencil className="h-4 w-4" />
+                        Editar
+                    </Button>
+                </div>
+            ),
+            cardCell: (user) => (
+                <div className="flex justify-end gap-2">
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant={user.is_active ? 'outline' : 'default'}
+                        onClick={() =>
+                            router.patch(
+                                route('users.toggle-status', user.id),
+                                { page: usersPagination.page },
+                                {
+                                    preserveScroll: true,
+                                    preserveState: true,
+                                },
+                            )
+                        }
+                    >
+                        {user.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                        {user.is_active ? 'Desactivar' : 'Activar'}
+                    </Button>
+
+                    <Button type="button" size="sm" variant="secondary" disabled>
+                        <Pencil className="h-4 w-4" />
+                        Editar
+                    </Button>
+                </div>
+            ),
         },
     ];
 

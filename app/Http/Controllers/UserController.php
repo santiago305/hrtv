@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -28,6 +29,7 @@ class UserController extends Controller
                     'name' => $user->role->name,
                     'slug' => $user->role->slug,
                 ] : null,
+                'is_active' => $user->is_active,
                 'email_verified_at' => $user->email_verified_at,
                 'created_at' => $user->created_at?->toDateTimeString(),
             ]);
@@ -53,10 +55,28 @@ class UserController extends Controller
             'password' => Hash::make($request->string('password')->toString()),
             'role_id' => $request->integer('role_id'),
             'email_verified_at' => now(),
+            'is_active' => true,
         ]);
 
         return redirect()
             ->route('users.index')
             ->with('success', 'Usuario creado correctamente.');
+    }
+
+    public function toggleStatus(Request $request, User $user): RedirectResponse
+    {
+        if ($request->user()?->id === $user->id) {
+            return redirect()
+                ->route('users.index', ['page' => $request->query('page')])
+                ->with('success', 'No puedes desactivar tu propio usuario.');
+        }
+
+        $user->update([
+            'is_active' => ! $user->is_active,
+        ]);
+
+        return redirect()
+            ->route('users.index', ['page' => $request->query('page')])
+            ->with('success', $user->is_active ? 'Usuario activado correctamente.' : 'Usuario desactivado correctamente.');
     }
 }
