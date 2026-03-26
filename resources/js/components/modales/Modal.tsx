@@ -1,0 +1,225 @@
+import {
+  type ReactNode,
+  type RefObject,
+  useEffect,
+} from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+
+type ModalAnimation = "scale" | "slide";
+
+type ModalProps = {
+  open: boolean;
+  onClose: () => void;
+  children: ReactNode;
+
+  title?: string;
+  description?: string;
+  footer?: ReactNode;
+
+  closeOnOverlayClick?: boolean;
+  closeOnEscape?: boolean;
+  lockScroll?: boolean;
+  preventClose?: boolean;
+
+  showOverlay?: boolean;
+  overlayBlur?: boolean;
+  showCloseButton?: boolean;
+  hideHeader?: boolean;
+
+  initialFocusRef?: RefObject<HTMLElement | null>;
+  animation?: ModalAnimation;
+
+  className?: string;
+  overlayClassName?: string;
+  containerClassName?: string;
+  headerClassName?: string;
+  bodyClassName?: string;
+  footerClassName?: string;
+  titleClassName?: string;
+  descriptionClassName?: string;
+  closeButtonClassName?: string;
+};
+
+export function Modal({
+  open,
+  onClose,
+  children,
+  title,
+  description,
+  footer,
+  closeOnOverlayClick = true,
+  closeOnEscape = true,
+  lockScroll = true,
+  preventClose = false,
+  showOverlay = true,
+  overlayBlur = false,
+  showCloseButton = true,
+  hideHeader = false,
+  initialFocusRef,
+  animation = "scale",
+  className,
+  overlayClassName,
+  containerClassName,
+  headerClassName,
+  bodyClassName,
+  footerClassName,
+  titleClassName,
+  descriptionClassName,
+  closeButtonClassName,
+}: ModalProps) {
+  const canClose = !preventClose;
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && closeOnEscape && canClose) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    const previousOverflow = document.body.style.overflow;
+
+    if (lockScroll) {
+      document.body.style.overflow = "hidden";
+    }
+
+    if (initialFocusRef?.current) {
+      requestAnimationFrame(() => {
+        initialFocusRef.current?.focus();
+      });
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open, closeOnEscape, canClose, onClose, lockScroll, initialFocusRef]);
+
+  const animationProps =
+    animation === "slide"
+      ? {
+          initial: { opacity: 0, y: 24 },
+          animate: { opacity: 1, y: 0 },
+          exit: { opacity: 0, y: 18 },
+        }
+      : {
+          initial: { opacity: 0, scale: 0.985, y: 10 },
+          animate: { opacity: 1, scale: 1, y: 0 },
+          exit: { opacity: 0, scale: 0.985, y: 8 },
+        };
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-50">
+          {showOverlay && (
+            <motion.div
+              className={cn(
+                "absolute inset-0 bg-black/20",
+                overlayBlur && "backdrop-blur-[2px]",
+                overlayClassName
+              )}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                if (closeOnOverlayClick && canClose) {
+                  onClose();
+                }
+              }}
+            />
+          )}
+
+          <div
+            className={cn(
+              "relative flex min-h-full w-full items-center justify-center p-4 sm:p-6",
+              containerClassName
+            )}
+          >
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-label={title || "Modal"}
+              onClick={(e) => e.stopPropagation()}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className={cn(
+                "relative flex h-auto max-h-[calc(100vh-2rem)] w-auto max-w-[calc(100vw-2rem)] flex-col overflow-hidden",
+                "rounded-2xl border border-zinc-200/80 bg-white",
+                "shadow-[0_20px_50px_-18px_rgba(0,0,0,0.22)]",
+                className
+              )}
+              {...animationProps}
+            >
+              {!hideHeader && (title || description || showCloseButton) && (
+                <div
+                  className={cn(
+                    "flex items-start justify-between gap-4 border-b border-zinc-100",
+                    "bg-zinc-50/70 px-5 py-4",
+                    headerClassName
+                  )}
+                >
+                  <div className="min-w-0">
+                    {title && (
+                      <h2
+                        className={cn(
+                          "text-[17px] font-semibold tracking-tight text-zinc-900",
+                          titleClassName
+                        )}
+                      >
+                        {title}
+                      </h2>
+                    )}
+
+                    {description && (
+                      <p
+                        className={cn(
+                          "mt-1 text-sm leading-5 text-zinc-500",
+                          descriptionClassName
+                        )}
+                      >
+                        {description}
+                      </p>
+                    )}
+                  </div>
+
+                  {showCloseButton && canClose && (
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className={cn(
+                        "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
+                        "border border-zinc-200 bg-white text-zinc-500 transition-colors",
+                        "hover:bg-zinc-100 hover:text-zinc-900",
+                        closeButtonClassName
+                      )}
+                      aria-label="Cerrar modal"
+                    >
+                      <span className="text-base leading-none">×</span>
+                    </button>
+                  )}
+                </div>
+              )}
+
+              <div className={cn("scroll-y-stable flex-1 px-5 py-5", bodyClassName)}>{children}</div>
+
+              {footer && (
+                <div
+                  className={cn(
+                    "border-t border-zinc-100 bg-zinc-50/60 px-5 py-4",
+                    footerClassName
+                  )}
+                >
+                  {footer}
+                </div>
+              )}
+            </motion.div>
+          </div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+}

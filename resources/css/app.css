@@ -159,6 +159,20 @@
     max-width: 1356px;
   }
 
+  .scroll-stable {
+    overflow: auto;
+    scrollbar-gutter: stable;
+    padding-right: 0; 
+    scrollbar-width: thin;
+  }
+
+  .scroll-y-stable {
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    padding-right: 0; /* Add padding to prevent content from being hidden behind the scrollbar */
+    scrollbar-width: thin;
+  }
+
   .text-balance {
     text-wrap: balance;
   }
