@@ -192,20 +192,20 @@ export function Modal({
                       type="button"
                       onClick={onClose}
                       className={cn(
-                        "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-xl bg-background text-muted-foreground transition-colors cursor-pointer",
+                        "inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-background text-muted-foreground transition-colors",
                         "hover:bg-muted hover:text-foreground",
                         closeButtonClassName
                       )}
                       aria-label="Cerrar modal"
                     >
-                      <span className="text-base leading-none">×</span>
+                      <span className="text-base leading-none">x</span>
                     </button>
                   )}
                 </div>
               )}
 
-              <div className={cn("scroll-y-stable flex-1 px-5 py-5", bodyClassName)}>
-                {children}
+              <div className="scroll-y-stable min-h-0 flex-1">
+                <div className={cn("px-4 py-4", bodyClassName)}>{children}</div>
               </div>
 
               {footer && (

@@ -54,7 +54,7 @@ export default function UsersIndex() {
                         </div>
 
                         <div className="lg:col-span-8 2xl:col-span-9">
-                            <UsersTableCard users={users} usersPagination={usersPagination} />
+                            <UsersTableCard users={users} usersPagination={usersPagination} roles={roles} />
                         </div>
                     </section>
                 </div>

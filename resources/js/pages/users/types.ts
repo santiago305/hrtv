@@ -30,6 +30,12 @@ export type UserFormData = {
     role_id: string;
 };
 
+export type UserUpdateFormData = {
+    name: string;
+    email: string;
+    role_id: string;
+};
+
 export type UsersPageProps = SharedData & {
     users: UserTableItem[];
     usersPagination: UsersPagination;

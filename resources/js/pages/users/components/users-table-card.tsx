@@ -4,12 +4,13 @@ import type { DataTableColumn } from '@/components/table/types';
 import { router } from '@inertiajs/react';
 import { Pencil, UserCheck, UserX } from 'lucide-react';
 import { useState } from 'react';
-import type { UsersPagination, UserTableItem } from '../types';
+import type { UserRole, UsersPagination, UserTableItem } from '../types';
 import { UserUpdateModal } from './user-update-modal';
 
 type UsersTableCardProps = {
     users: UserTableItem[];
     usersPagination: UsersPagination;
+    roles: UserRole[];
 };
 
 function buildActions(
@@ -43,7 +44,7 @@ function buildActions(
     ];
 }
 
-export function UsersTableCard({ users, usersPagination }: UsersTableCardProps) {
+export function UsersTableCard({ users, usersPagination, roles }: UsersTableCardProps) {
     const [selectedUser, setSelectedUser] = useState<UserTableItem | null>(null);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
@@ -152,7 +153,7 @@ export function UsersTableCard({ users, usersPagination }: UsersTableCardProps) 
                 />
             </div>
 
-            <UserUpdateModal open={isUpdateModalOpen} user={selectedUser} onClose={closeUpdateModal} />
+            <UserUpdateModal open={isUpdateModalOpen} user={selectedUser} roles={roles} page={usersPagination.page} onClose={closeUpdateModal} />
         </>
     );
 }

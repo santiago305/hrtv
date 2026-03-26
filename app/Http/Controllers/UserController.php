@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Users\StoreUserRequest;
+use App\Http\Requests\Users\UpdateUserRequest;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -71,8 +72,25 @@ class UserController extends Controller
             ->with('success', 'Usuario creado correctamente.');
     }
 
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse
+    {
+        abort_unless($request->user()?->canManageRole($user->role), 403);
+
+        $user->update([
+            'name' => $request->string('name')->toString(),
+            'email' => $request->string('email')->toString(),
+            'role_id' => $request->integer('role_id'),
+        ]);
+
+        return redirect()
+            ->route('users.index', ['page' => $request->query('page')])
+            ->with('success', 'Usuario actualizado correctamente.');
+    }
+
     public function toggleStatus(Request $request, User $user): RedirectResponse
     {
+        abort_unless($request->user()?->canManageRole($user->role), 403);
+
         if ($request->user()?->id === $user->id) {
             return redirect()
                 ->route('users.index', ['page' => $request->query('page')])
