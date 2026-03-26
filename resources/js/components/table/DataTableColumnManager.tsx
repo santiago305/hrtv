@@ -36,12 +36,12 @@ export function DataTableColumnManager({ columns, visibleColumnIds, orderedColum
                 aria-haspopup="dialog"
                 onClick={() => setOpen((current) => !current)}
                 className={cn(
-                    'inline-flex h-11 items-center gap-2 rounded-2xl border px-4 text-sm font-medium shadow-sm transition',
+                    'inline-flex h-11 items-center gap-2 rounded-md border px-4 text-xs font-medium shadow-sm transition',
                     open ? 'border-primary/30 bg-primary/5 text-foreground' : 'border-border/70 bg-background text-foreground hover:bg-muted/50',
                 )}
             >
                 <Settings2 className="h-4 w-4" />
-                Configurar tabla
+                columnas
             </button>
 
             <Popover
@@ -57,7 +57,7 @@ export function DataTableColumnManager({ columns, visibleColumnIds, orderedColum
             >
                 <div className="mb-3 flex items-start justify-between gap-3">
                     <div>
-                        <p className="text-sm font-semibold text-foreground">Columnas</p>
+                        <p className="text-xs font-semibold text-foreground">Columnas</p>
                         <p className="mt-1 text-xs text-muted-foreground">Activa, oculta y ordena arrastrando.</p>
                     </div>
 
@@ -108,7 +108,7 @@ export function DataTableColumnManager({ columns, visibleColumnIds, orderedColum
                                     setDragOverColumnId(null);
                                 }}
                                 className={cn(
-                                    'flex items-center gap-3 rounded-2xl border px-3 py-3 transition',
+                                    'flex items-center gap-2 rounded-xl border px-2 py-2 transition',
                                     'border-border/60 bg-background',
                                     draggingColumnId === column.id && 'scale-[0.99] opacity-60',
                                     dragOverColumnId === column.id && 'border-primary/40 bg-primary/5',
@@ -139,7 +139,7 @@ export function DataTableColumnManager({ columns, visibleColumnIds, orderedColum
                                 </button>
 
                                 <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-medium text-foreground">{column.header}</p>
+                                    <p className="truncate text-xs font-medium text-foreground">{column.header}</p>
 
                                     <div className="mt-1.5 flex flex-wrap gap-1.5">
                                         {column.hideable === false ? (

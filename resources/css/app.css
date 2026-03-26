@@ -173,6 +173,29 @@
     scrollbar-width: thin;
   }
 
+  .scroll-x-thin {
+    overflow-x: auto;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+  }
+
+  .scroll-x-thin::-webkit-scrollbar {
+    height: 5px;
+  }
+
+  .scroll-x-thin::-webkit-scrollbar-track {
+    background: hsl(var(--surface));
+  }
+
+  .scroll-x-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 9999px;
+  }
+
+  .scroll-x-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+
   .text-balance {
     text-wrap: balance;
   }

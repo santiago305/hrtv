@@ -33,7 +33,7 @@ export function DataTableToolbar({
                             name="datatable-search"
                             value={searchValue}
                             onChange={(event) => onSearchChange(event.target.value)}
-                            className="h-11 rounded-2xl border-border/70 pl-4 pr-4 shadow-sm"
+                            className="h-11 rounded-sm border-border/70 pl-4 pr-4 shadow-sm"
                         />
 
                         {searchValue ? (

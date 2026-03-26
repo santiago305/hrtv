@@ -111,7 +111,7 @@ export function FloatingSelect({
                         }
                     }}
                     className={[
-                        'relative flex h-10 w-full items-center justify-between rounded-lg border bg-white px-3 py-2 text-left text-sm outline-none transition-all',
+                        'relative flex h-10 w-full items-center justify-between rounded-lg border bg-white px-3 py-2 text-left text-xs outline-none transition-all',
                         error ? 'border-red-500 ring-0' : open ? 'border-primary ring-2 ring-primary/30' : 'border-black/20',
                         disabled ? 'cursor-not-allowed bg-black/5 text-black/50' : '',
                         className,
@@ -132,7 +132,7 @@ export function FloatingSelect({
                     htmlFor={name}
                     className={[
                         'pointer-events-none absolute left-3 bg-white px-1 transition-all duration-200',
-                        hasValue || open ? 'top-0 -translate-y-1/2 text-[11px]' : 'top-1/2 -translate-y-1/2 text-sm',
+                        hasValue || open ? 'top-0 -translate-y-1/2 text-[11px]' : 'top-1/2 -translate-y-1/2 text-xs',
                         error ? 'text-red-500' : open ? 'text-primary' : 'text-black/50',
                     ].join(' ')}
                 >
@@ -159,14 +159,14 @@ export function FloatingSelect({
                                             onSearchChange?.(next);
                                         }}
                                         placeholder={searchPlaceholder}
-                                        className="h-9 w-full rounded-md border border-black/10 px-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30"
+                                        className="h-9 w-full rounded-md border border-black/10 px-3 text-xs outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30"
                                     />
                                 </div>
                             )}
 
                             <div className="max-h-64 overflow-y-auto py-1">
                                 {filteredOptions.length === 0 ? (
-                                    <div className="px-3 py-2 text-sm text-black/40">{emptyMessage}</div>
+                                    <div className="px-3 py-2 text-xs text-black/40">{emptyMessage}</div>
                                 ) : (
                                     filteredOptions.map((option) => {
                                         const isSelected = option.value === value;
@@ -182,7 +182,7 @@ export function FloatingSelect({
                                                     setQuery('');
                                                 }}
                                                 className={[
-                                                    'flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors',
+                                                    'flex w-full items-center justify-between px-3 py-2 text-left text-xs transition-colors',
                                                     isSelected ? 'bg-primary/10 text-primary' : 'text-black hover:bg-black/5',
                                                 ].join(' ')}
                                                 role="option"

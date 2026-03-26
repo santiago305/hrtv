@@ -379,7 +379,7 @@ export function DataTable<T extends Record<string, unknown>>({
                 }}
                 selectionInfo={
                     selectableRows ? (
-                        <div className="inline-flex items-center gap-2 rounded-2xl border border-border/70 bg-background px-3 py-2 text-sm text-muted-foreground shadow-sm">
+                        <div className="inline-flex items-center gap-2 rounded-sm border border-border/70 bg-background px-3 py-2 text-sm text-muted-foreground shadow-sm">
                             <CheckSquare className="h-4 w-4" />
                             {activeSelectedRowKeys.length} fila(s) seleccionada(s)
                         </div>
@@ -419,9 +419,9 @@ export function DataTable<T extends Record<string, unknown>>({
                 />
             ) : null}
 
-            <div className="relative hidden rounded-3xl border border-border/70 bg-background shadow-sm md:block">
-                <div className="max-h-[90vh] overflow-auto rounded-3xl">
-                    <table className={cn('w-full min-w-full text-sm', tableClassName)}>
+            <div className="relative hidden rounded-sm border border-border/70 bg-background shadow-sm md:block">
+                <div className="scroll-x-thin max-h-[90vh] overflow-y-auto rounded-sm">
+                    <table className={cn('w-full min-w-full text-xs', tableClassName)}>
                         <thead
                             className={cn(
                                 stickyHeader && 'sticky top-0 z-10 bg-background/95 backdrop-blur'
@@ -457,7 +457,7 @@ export function DataTable<T extends Record<string, unknown>>({
                                             key={column.id}
                                             style={column.width ? { width: column.width } : undefined}
                                             className={cn(
-                                                'px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground',
+                                                'px-2.5 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground',
                                                 column.headerClassName
                                             )}
                                         >
@@ -545,7 +545,7 @@ export function DataTable<T extends Record<string, unknown>>({
                                         <>
                                             {selectableRows ? (
                                                 <td
-                                                    className="px-4 py-3.5"
+                                                    className="px-2.5 py-2"
                                                     onClick={(event) => event.stopPropagation()}
                                                 >
                                                     <button
@@ -583,7 +583,7 @@ export function DataTable<T extends Record<string, unknown>>({
                                                                 : undefined
                                                         }
                                                         className={cn(
-                                                            'px-4 py-3.5 align-middle text-foreground',
+                                                            'px-2.5 py-2 align-middle text-foreground',
                                                             column.className,
                                                             isCellClickable &&
                                                                 'cursor-pointer hover:underline'

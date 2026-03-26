@@ -57,10 +57,10 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(fu
                 <label
                     htmlFor={name}
                     className={[
-                        'pointer-events-none absolute left-3 bg-white px-1 text-sm transition-all duration-200',
-                        hasValue ? 'top-0 -translate-y-1/2 text-[11px]' : 'top-1/2 -translate-y-1/2 text-sm',
+                        'pointer-events-none absolute left-3 bg-white px-1 text-xs transition-all duration-200',
+                        hasValue ? 'top-0 -translate-y-1/2 text-[10px]' : 'top-1/2 -translate-y-1/2 text-xs',
                         error ? 'text-red-500 peer-focus:text-red-500' : 'text-black/50 peer-focus:text-primary',
-                        'peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-[11px]',
+                        'peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-[10px]',
                     ].join(' ')}
                 >
                     {label}
