@@ -43,12 +43,12 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(fu
                     disabled={disabled}
                     placeholder=" "
                     className={[
-                        'peer h-10 w-full rounded-lg border bg-white px-3 py-2 text-sm outline-none transition-all',
+                        'peer h-10 w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground outline-none transition-all',
                         isPassword ? 'pr-10' : '',
                         error
-                            ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                            : 'border-black/20 focus:border-primary focus:ring-2 focus:ring-primary/30',
-                        disabled ? 'cursor-not-allowed bg-black/5 text-black/50' : '',
+                            ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200/40 dark:focus:ring-red-500/20'
+                            : 'border-border focus:border-primary focus:ring-2 focus:ring-primary/30',
+                        disabled ? 'cursor-not-allowed bg-muted text-muted-foreground' : '',
                         className,
                     ].join(' ')}
                     {...props}
@@ -57,9 +57,9 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(fu
                 <label
                     htmlFor={name}
                     className={[
-                        'pointer-events-none absolute left-3 bg-white px-1 text-xs transition-all duration-200',
+                        'pointer-events-none absolute left-3 bg-background px-1 text-xs transition-all duration-200',
                         hasValue ? 'top-0 -translate-y-1/2 text-[10px]' : 'top-1/2 -translate-y-1/2 text-xs',
-                        error ? 'text-red-500 peer-focus:text-red-500' : 'text-black/50 peer-focus:text-primary',
+                        error ? 'text-red-500 peer-focus:text-red-500' : 'text-muted-foreground peer-focus:text-primary',
                         'peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-[10px]',
                     ].join(' ')}
                 >
@@ -70,14 +70,14 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(fu
                     <button
                         type="button"
                         onClick={() => setShowPassword((prev) => !prev)}
-                        className="absolute top-1/2 right-3 -translate-y-1/2 text-xs text-black/50 hover:text-black"
+                        className="absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground transition hover:text-foreground"
                     >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                 )}
             </div>
 
-            {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+            {error && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{error}</p>}
         </div>
     );
 });

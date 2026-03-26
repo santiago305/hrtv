@@ -119,7 +119,7 @@ export function Modal({
           {showOverlay && (
             <motion.div
               className={cn(
-                "absolute inset-0 bg-black/20",
+                "absolute inset-0 bg-black/40 dark:bg-black/60",
                 overlayBlur && "backdrop-blur-[2px]",
                 overlayClassName
               )}
@@ -148,8 +148,8 @@ export function Modal({
               transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
                 "relative flex h-auto max-h-[calc(100vh-2rem)] w-auto max-w-[calc(100vw-2rem)] flex-col overflow-hidden",
-                "rounded-2xl border border-zinc-200/80 bg-white",
-                "shadow-[0_20px_50px_-18px_rgba(0,0,0,0.22)]",
+                "rounded-2xl border border-border bg-background text-foreground",
+                "shadow-[0_20px_50px_-18px_rgba(0,0,0,0.22)] dark:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)]",
                 className
               )}
               {...animationProps}
@@ -157,8 +157,7 @@ export function Modal({
               {!hideHeader && (title || description || showCloseButton) && (
                 <div
                   className={cn(
-                    "flex items-start justify-between gap-4 border-b border-zinc-100",
-                    "bg-zinc-50/70 px-5 py-4",
+                    "flex items-start justify-between gap-4 border-b border-border bg-muted/40 px-5 py-4",
                     headerClassName
                   )}
                 >
@@ -166,7 +165,7 @@ export function Modal({
                     {title && (
                       <h2
                         className={cn(
-                          "text-[17px] font-semibold tracking-tight text-zinc-900",
+                          "text-[17px] font-semibold tracking-tight text-foreground",
                           titleClassName
                         )}
                       >
@@ -177,7 +176,7 @@ export function Modal({
                     {description && (
                       <p
                         className={cn(
-                          "mt-1 text-sm leading-5 text-zinc-500",
+                          "mt-1 text-sm leading-5 text-muted-foreground",
                           descriptionClassName
                         )}
                       >
@@ -191,14 +190,13 @@ export function Modal({
                       type="button"
                       onClick={onClose}
                       className={cn(
-                        "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
-                        "border border-zinc-200 bg-white text-zinc-500 transition-colors",
-                        "hover:bg-zinc-100 hover:text-zinc-900",
+                        "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground transition-colors",
+                        "hover:bg-muted hover:text-foreground",
                         closeButtonClassName
                       )}
                       aria-label="Cerrar modal"
                     >
-                      <span className="text-base leading-none">Ã—</span>
+                      <span className="text-base leading-none">×</span>
                     </button>
                   )}
                 </div>
@@ -209,7 +207,7 @@ export function Modal({
               {footer && (
                 <div
                   className={cn(
-                    "border-t border-zinc-100 bg-zinc-50/60 px-5 py-4",
+                    "border-t border-border bg-muted/40 px-5 py-4",
                     footerClassName
                   )}
                 >

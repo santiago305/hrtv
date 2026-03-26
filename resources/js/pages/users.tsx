@@ -7,7 +7,7 @@ import type { DataTableColumn } from '@/components/table/types';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { Pencil, UserCheck, UserPlus, UserX, Users } from 'lucide-react';
+import { Pencil, UserCheck, UserPlus, UserX } from 'lucide-react';
 
 type Role = {
     id: number;
@@ -66,7 +66,7 @@ export default function UsersIndex() {
             id: 'name',
             header: 'Nombre',
             accessorKey: 'name',
-            className: 'font-medium text-black',
+            className: 'font-medium text-foreground',
             hideable: false,
         },
         {
@@ -85,8 +85,8 @@ export default function UsersIndex() {
                 <span
                     className={
                         user.is_active
-                            ? 'inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700'
-                            : 'inline-flex rounded-full bg-slate-200 px-3 py-1 text-xs font-medium text-slate-700'
+                            ? 'inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
+                            : 'inline-flex rounded-full bg-slate-200 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-500/15 dark:text-slate-300'
                     }
                 >
                     {user.is_active ? 'Activo' : 'Inactivo'}
@@ -104,7 +104,7 @@ export default function UsersIndex() {
             header: 'Acciones',
             hideable: false,
             searchable: false,
-            className: 'flex justify-center items-center',
+            className: 'flex items-center justify-center',
             sortable: false,
             cardLabel: 'Acciones',
             cell: (user) => {
@@ -114,7 +114,7 @@ export default function UsersIndex() {
                         label: user.is_active ? 'Desactivar' : 'Activar',
                         icon: user.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />,
                         danger: user.is_active,
-                        className: user.is_active ? 'hover:bg-red-50/80' : 'hover:bg-primary/5',
+                        className: user.is_active ? 'hover:bg-red-500/10' : 'hover:bg-primary/5',
                         onClick: () =>
                             router.patch(
                                 route('users.toggle-status', user.id),
@@ -134,14 +134,7 @@ export default function UsersIndex() {
                     },
                 ];
 
-                return (
-                    <ActionsPopover
-                        actions={actions}
-                        columns={1}
-                        compact
-                        triggerVariant="outline"
-                    />
-                );
+                return <ActionsPopover actions={actions} columns={1} compact triggerVariant="outline" />;
             },
             cardCell: (user) => {
                 const actions: ActionItem[] = [
@@ -150,7 +143,7 @@ export default function UsersIndex() {
                         label: user.is_active ? 'Desactivar' : 'Activar',
                         icon: user.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />,
                         danger: user.is_active,
-                        className: user.is_active ? 'hover:bg-red-50/80' : 'hover:bg-primary/5',
+                        className: user.is_active ? 'hover:bg-red-500/10' : 'hover:bg-primary/5',
                         onClick: () =>
                             router.patch(
                                 route('users.toggle-status', user.id),
@@ -172,12 +165,7 @@ export default function UsersIndex() {
 
                 return (
                     <div className="flex justify-end">
-                        <ActionsPopover
-                            actions={actions}
-                            columns={1}
-                            compact
-                            triggerVariant="outline"
-                        />
+                        <ActionsPopover actions={actions} columns={1} compact triggerVariant="outline" />
                     </div>
                 );
             },
@@ -192,25 +180,25 @@ export default function UsersIndex() {
                 <div className="flex flex-col gap-6">
                     <section className="grid grid-cols-1 gap-6 lg:grid-cols-12">
                         <div className="lg:col-span-4 2xl:col-span-3">
-                            <div className="rounded-sm border border-border  p-5 sm:p-6 lg:sticky lg:top-6">
+                            <div className="rounded-sm border border-border bg-background p-5 sm:p-6 lg:sticky lg:top-6">
                                 <div className="mb-5 flex items-center gap-3 border-b border-border pb-4">
                                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                                         <UserPlus className="h-5 w-5" />
                                     </div>
 
                                     <div>
-                                        <h1 className="text-base font-semibold text-black">Crear usuario</h1>
+                                        <h1 className="text-base font-semibold text-foreground">Crear usuario</h1>
                                     </div>
                                 </div>
 
                                 {flash?.success && (
-                                    <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                                    <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300">
                                         {flash.success}
                                     </div>
                                 )}
 
                                 {!canCreateUsers && (
-                                    <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                                    <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
                                         Tu rol no tiene permisos para crear usuarios por debajo en la jerarquia actual.
                                     </div>
                                 )}
@@ -220,8 +208,7 @@ export default function UsersIndex() {
                                     onSubmit={(event) => {
                                         event.preventDefault();
                                         post(route('users.store'), {
-                                            onSuccess: () =>
-                                                reset('name', 'email', 'password', 'password_confirmation'),
+                                            onSuccess: () => reset('name', 'email', 'password', 'password_confirmation'),
                                         });
                                     }}
                                 >
@@ -286,13 +273,13 @@ export default function UsersIndex() {
                         </div>
 
                         <div className="lg:col-span-8 2xl:col-span-9">
-                            <div className="rounded-sm border border-border p-5 sm:p-6">
+                            <div className="rounded-sm border border-border bg-background p-5 sm:p-6">
                                 <div className="mb-5 flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
                                     <div>
-                                        <h2 className="text-base font-semibold text-black">Usuarios creados</h2>
+                                        <h2 className="text-base font-semibold text-foreground">Usuarios creados</h2>
                                     </div>
 
-                                    <div className="inline-flex w-fit items-center rounded-full border border-border bg-white px-3 py-1 text-xs font-medium text-black/60">
+                                    <div className="inline-flex w-fit items-center rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
                                         {usersPagination.total} registros
                                     </div>
                                 </div>

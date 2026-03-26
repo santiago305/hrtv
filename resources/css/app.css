@@ -131,6 +131,15 @@
     --surface: 222 50% 10%;
     --surface-alt: 222 85% 6%;
     --text-secondary: 215 20% 65%;
+
+    --sidebar-background: 222 85% 6%;
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 210 40% 96%;
+    --sidebar-primary-foreground: 222 85% 6%;
+    --sidebar-accent: 217 33% 14%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 212 27% 84%;
   }
 
   * {
@@ -169,7 +178,7 @@
   .scroll-y-stable {
     overflow-y: auto;
     scrollbar-gutter: stable;
-    padding-right: 0; /* Add padding to prevent content from being hidden behind the scrollbar */
+    padding-right: 0;
     scrollbar-width: thin;
   }
 

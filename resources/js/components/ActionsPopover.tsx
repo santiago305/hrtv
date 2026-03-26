@@ -83,14 +83,14 @@ type ActionsPopoverProps = {
 function getTriggerVariantClasses(variant: ActionsTriggerVariant) {
   switch (variant) {
     case "subtle":
-      return "bg-zinc-50 text-zinc-600 ";
+      return "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground";
     case "outline":
-      return "  text-zinc-600 ";
+      return "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground";
     case "solid":
-      return "bg-zinc-900 text-white ";
+      return "bg-foreground text-background hover:opacity-90";
     case "ghost":
     default:
-      return "text-zinc-500";
+      return "text-muted-foreground hover:bg-muted hover:text-foreground";
   }
 }
 
@@ -185,7 +185,7 @@ export function ActionsPopover({
         aria-expanded={isOpen}
         aria-haspopup="dialog"
         className={cn(
-          "inline-flex items-center justify-center transition-all duration-200 cursor-pointer",
+          "inline-flex cursor-pointer items-center justify-center rounded-md transition-all duration-200",
           "disabled:pointer-events-none disabled:opacity-50",
           compact ? "h-8 w-8" : "h-9 w-9",
           getTriggerVariantClasses(triggerVariant),
@@ -214,11 +214,11 @@ export function ActionsPopover({
         offset={offset}
         animation={animation}
         className={cn(
-          "max-w-[calc(100vw-1rem)] rounded-xl",
+          "max-w-[calc(100vw-1rem)] rounded-xl border-border bg-popover text-popover-foreground",
           compact ? "min-w-40" : "min-w-48",
           popoverClassName
         )}
-        bodyClassName={cn(compact ? "" : "", popoverBodyClassName)}
+        bodyClassName={cn(popoverBodyClassName)}
       >
         <div
           className={cn(
@@ -237,23 +237,15 @@ export function ActionsPopover({
             }
 
             const isLink = !!action.href && !action.disabled;
-            const sizeClasses = compact
-              ? "h-auto"
-              : "h-auto";
-
-            const iconBoxClasses = compact
-              ? "h-6 w-6"
-              : "h-8 w-8";
+            const sizeClasses = compact ? "h-auto" : "h-auto";
+            const iconBoxClasses = compact ? "h-6 w-6" : "h-8 w-8";
 
             const sharedClassName = cn(
-              "group flex w-full items-center justify-center gap-2 text-center transition-all cursor-pointer rounded-md",
-              "  text-zinc-700",
-              "hover:hover:bg-zinc-50 hover:text-zinc-950",
-              "focus:outline-none focus:ring-2 focus:ring-zinc-200",
+              "group flex w-full items-center justify-center gap-2 rounded-md text-center transition-all cursor-pointer",
+              "text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring/40",
               "disabled:pointer-events-none disabled:opacity-45",
               sizeClasses,
-              action.danger &&
-                "text-red-600 hover:text-red-700",
+              action.danger && "text-red-600 hover:bg-red-500/10 hover:text-red-600 dark:text-red-400 dark:hover:text-red-400",
               itemClassName,
               action.className
             );
@@ -263,11 +255,9 @@ export function ActionsPopover({
                 <div className="flex items-center justify-center">
                   <div
                     className={cn(
-                      "flex items-center justify-center transition-colors",
-                      "text-zinc-600",
+                      "flex items-center justify-center transition-colors text-muted-foreground",
                       iconBoxClasses,
-                      action.danger &&
-                        " text-red-600"
+                      action.danger && "text-red-600 dark:text-red-400"
                     )}
                   >
                     {action.icon}
@@ -286,7 +276,7 @@ export function ActionsPopover({
                     </div>
 
                     {action.description && !compact && (
-                      <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-zinc-500">
+                      <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-muted-foreground">
                         {action.description}
                       </p>
                     )}

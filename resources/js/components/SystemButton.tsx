@@ -30,19 +30,19 @@ function cn(...classes: Array<string | false | null | undefined>) {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-primary text-white shadow-sm hover:brightness-110 active:scale-[0.98] focus-visible:ring-primary/30",
+    "bg-primary text-primary-foreground shadow-sm hover:brightness-110 active:scale-[0.98] focus-visible:ring-primary/30",
   secondary:
-    "bg-zinc-900 text-white shadow-sm hover:bg-zinc-800 active:scale-[0.98] focus-visible:ring-zinc-300",
+    "bg-secondary text-secondary-foreground shadow-sm hover:opacity-90 active:scale-[0.98] focus-visible:ring-ring/40",
   success:
-    "bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 active:scale-[0.98] focus-visible:ring-emerald-200",
+    "bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 active:scale-[0.98] focus-visible:ring-emerald-200 dark:focus-visible:ring-emerald-500/30",
   warning:
-    "bg-amber-500 text-white shadow-sm hover:bg-amber-600 active:scale-[0.98] focus-visible:ring-amber-200",
+    "bg-amber-500 text-white shadow-sm hover:bg-amber-600 active:scale-[0.98] focus-visible:ring-amber-200 dark:focus-visible:ring-amber-500/30",
   danger:
-    "bg-red-600 text-white shadow-sm hover:bg-red-700 active:scale-[0.98] focus-visible:ring-red-200",
+    "bg-red-600 text-white shadow-sm hover:bg-red-700 active:scale-[0.98] focus-visible:ring-red-200 dark:focus-visible:ring-red-500/30",
   outline:
-    "border border-black/10 bg-white text-black hover:bg-black/[0.03] active:scale-[0.98] focus-visible:ring-black/10",
+    "border border-border bg-background text-foreground hover:bg-muted active:scale-[0.98] focus-visible:ring-ring/30",
   ghost:
-    "bg-transparent text-black hover:bg-black/[0.04] active:scale-[0.98] focus-visible:ring-black/10",
+    "bg-transparent text-foreground hover:bg-muted active:scale-[0.98] focus-visible:ring-ring/30",
   link:
     "bg-transparent text-primary underline-offset-4 hover:underline active:scale-[0.99] focus-visible:ring-primary/20 shadow-none",
 };
@@ -75,7 +75,7 @@ export function SystemButton({
       type={type}
       disabled={isDisabled}
       className={cn(
-        "inline-flex items-center justify-center gap-2 font-medium outline-none transition-all duration-200 select-none cursor-pointer",
+        "inline-flex cursor-pointer select-none items-center justify-center gap-2 font-medium outline-none transition-all duration-200",
         "focus-visible:ring-4 disabled:pointer-events-none disabled:opacity-60",
         variantClasses[variant],
         sizeClasses[size],

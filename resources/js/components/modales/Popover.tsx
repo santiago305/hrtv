@@ -434,8 +434,8 @@ export function Popover({
           aria-modal="false"
           className={cn(
             "fixed z-50 flex max-h-[calc(100vh-1rem)] min-w-88 max-w-[calc(100vw-1rem)] flex-col overflow-hidden",
-            "rounded-2xl border border-zinc-200/80 bg-white",
-            "shadow-[0_16px_40px_-16px_rgba(0,0,0,0.22)]",
+            "rounded-2xl border border-border bg-popover text-popover-foreground",
+            "shadow-[0_16px_40px_-16px_rgba(0,0,0,0.22)] dark:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.65)]",
             transformOriginClass,
             className
           )}
@@ -450,7 +450,7 @@ export function Popover({
           {!hideHeader && (title || description || showCloseButton) && (
             <div
               className={cn(
-                "flex items-start justify-between gap-3 py-2 px-3",
+                "flex items-start justify-between gap-3 border-b border-border px-3 py-2",
                 headerClassName
               )}
             >
@@ -458,7 +458,7 @@ export function Popover({
                 {title && (
                   <h3
                     className={cn(
-                      "text-[9px] tracking-tight text-zinc-900",
+                      "text-[10px] tracking-tight text-popover-foreground",
                       titleClassName
                     )}
                   >
@@ -469,7 +469,7 @@ export function Popover({
                 {description && (
                   <p
                     className={cn(
-                      "mt-1 text-xs leading-5 text-zinc-500",
+                      "mt-1 text-xs leading-5 text-muted-foreground",
                       descriptionClassName
                     )}
                   >
@@ -483,12 +483,12 @@ export function Popover({
                   type="button"
                   onClick={onClose}
                   className={cn(
-                    "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900",
+                    "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition hover:bg-muted hover:text-foreground",
                     closeButtonClassName
                   )}
                   aria-label="Cerrar popover"
                 >
-                  ×
+                  x
                 </button>
               )}
             </div>
@@ -506,7 +506,7 @@ export function Popover({
           {footer && (
             <div
               className={cn(
-                "border-t border-zinc-100 bg-zinc-50/60 px-4 py-3",
+                "border-t border-border bg-muted/40 px-4 py-3",
                 footerClassName
               )}
             >
