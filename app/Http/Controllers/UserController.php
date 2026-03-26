@@ -6,17 +6,21 @@ use App\Http\Requests\Users\StoreUserRequest;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class UserController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $currentUser = $request->user();
+
         $users = User::query()
-            ->with('role')
+            ->select(['id', 'name', 'email', 'role_id', 'is_active', 'email_verified_at', 'created_at'])
+            ->excludeUser($currentUser?->id)
+            ->with(['role:id,name,slug'])
             ->latest()
             ->paginate(20)
             ->withQueryString()
@@ -34,6 +38,12 @@ class UserController extends Controller
                 'created_at' => $user->created_at?->toDateTimeString(),
             ]);
 
+        $availableRoles = Role::query()
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug'])
+            ->filter(fn (Role $role) => $currentUser?->canManageRole($role))
+            ->values();
+
         return Inertia::render('users', [
             'users' => $users->items(),
             'usersPagination' => [
@@ -41,9 +51,7 @@ class UserController extends Controller
                 'limit' => $users->perPage(),
                 'total' => $users->total(),
             ],
-            'roles' => Role::query()
-                ->orderBy('name')
-                ->get(['id', 'name', 'slug']),
+            'roles' => $availableRoles,
         ]);
     }
 

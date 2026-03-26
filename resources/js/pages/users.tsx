@@ -5,7 +5,7 @@ import { SystemButton } from '@/components/SystemButton';
 import { DataTable } from '@/components/table/DataTable';
 import type { DataTableColumn } from '@/components/table/types';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Pencil, UserCheck, UserPlus, UserX, Users } from 'lucide-react';
 
@@ -25,7 +25,7 @@ type UserItem = {
     created_at: string | null;
 };
 
-type PageProps = {
+type PageProps = SharedData & {
     users: UserItem[];
     usersPagination: {
         page: number;
@@ -51,6 +51,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function UsersIndex() {
     const { users, usersPagination, roles, flash } = usePage<PageProps>().props;
+    const canCreateUsers = roles.length > 0;
 
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
@@ -189,7 +190,6 @@ export default function UsersIndex() {
 
             <div className="container-main py-4 text-xs sm:py-6">
                 <div className="flex flex-col gap-6">
-
                     <section className="grid grid-cols-1 gap-6 lg:grid-cols-12">
                         <div className="lg:col-span-4 2xl:col-span-3">
                             <div className="rounded-sm border border-border  p-5 sm:p-6 lg:sticky lg:top-6">
@@ -209,6 +209,12 @@ export default function UsersIndex() {
                                     </div>
                                 )}
 
+                                {!canCreateUsers && (
+                                    <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                                        Tu rol no tiene permisos para crear usuarios por debajo en la jerarquia actual.
+                                    </div>
+                                )}
+
                                 <form
                                     className="space-y-4"
                                     onSubmit={(event) => {
@@ -225,7 +231,7 @@ export default function UsersIndex() {
                                         value={data.name}
                                         onChange={(event) => setData('name', event.target.value)}
                                         error={errors.name}
-                                        disabled={processing}
+                                        disabled={processing || !canCreateUsers}
                                     />
 
                                     <FloatingInput
@@ -235,7 +241,7 @@ export default function UsersIndex() {
                                         value={data.email}
                                         onChange={(event) => setData('email', event.target.value)}
                                         error={errors.email}
-                                        disabled={processing}
+                                        disabled={processing || !canCreateUsers}
                                     />
 
                                     <FloatingSelect
@@ -249,7 +255,7 @@ export default function UsersIndex() {
                                         onChange={(value) => setData('role_id', value)}
                                         error={errors.role_id}
                                         placeholder="Selecciona un rol"
-                                        disabled={processing}
+                                        disabled={processing || !canCreateUsers}
                                     />
 
                                     <FloatingInput
@@ -259,7 +265,7 @@ export default function UsersIndex() {
                                         value={data.password}
                                         onChange={(event) => setData('password', event.target.value)}
                                         error={errors.password}
-                                        disabled={processing}
+                                        disabled={processing || !canCreateUsers}
                                     />
 
                                     <FloatingInput
@@ -269,10 +275,10 @@ export default function UsersIndex() {
                                         value={data.password_confirmation}
                                         onChange={(event) => setData('password_confirmation', event.target.value)}
                                         error={errors.password_confirmation}
-                                        disabled={processing}
+                                        disabled={processing || !canCreateUsers}
                                     />
 
-                                    <SystemButton type="submit" size="sm" fullWidth loading={processing} className="mt-2">
+                                    <SystemButton type="submit" size="sm" fullWidth loading={processing} className="mt-2" disabled={!canCreateUsers}>
                                         Crear usuario
                                     </SystemButton>
                                 </form>
@@ -280,7 +286,7 @@ export default function UsersIndex() {
                         </div>
 
                         <div className="lg:col-span-8 2xl:col-span-9">
-                            <div className="rounded-2xl border border-border bg-white p-5 sm:p-6">
+                            <div className="rounded-sm border border-border p-5 sm:p-6">
                                 <div className="mb-5 flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
                                     <div>
                                         <h2 className="text-base font-semibold text-black">Usuarios creados</h2>

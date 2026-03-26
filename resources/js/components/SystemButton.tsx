@@ -75,7 +75,7 @@ export function SystemButton({
       type={type}
       disabled={isDisabled}
       className={cn(
-        "inline-flex items-center justify-center gap-2 font-medium outline-none transition-all duration-200 select-none",
+        "inline-flex items-center justify-center gap-2 font-medium outline-none transition-all duration-200 select-none cursor-pointer",
         "focus-visible:ring-4 disabled:pointer-events-none disabled:opacity-60",
         variantClasses[variant],
         sizeClasses[size],

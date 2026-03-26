@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -54,5 +55,24 @@ class User extends Authenticatable
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function roleHierarchyLevel(): int
+    {
+        return $this->role?->hierarchyLevel() ?? 0;
+    }
+
+    public function canManageRole(Role $role): bool
+    {
+        return $role->hierarchyLevel() < $this->roleHierarchyLevel();
+    }
+
+    public function scopeExcludeUser(Builder $query, ?int $userId): Builder
+    {
+        if ($userId === null) {
+            return $query;
+        }
+
+        return $query->whereKeyNot($userId);
     }
 }

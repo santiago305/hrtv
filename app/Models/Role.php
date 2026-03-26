@@ -10,6 +10,12 @@ class Role extends Model
 {
     use HasFactory;
 
+    public const HIERARCHY = [
+        'admin' => 100,
+        'moderator' => 50,
+        'writer' => 10,
+    ];
+
     protected $fillable = [
         'name',
         'slug',
@@ -18,5 +24,10 @@ class Role extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    public function hierarchyLevel(): int
+    {
+        return self::HIERARCHY[$this->slug] ?? 0;
     }
 }
