@@ -67,6 +67,29 @@ class User extends Authenticatable
         return $role->hierarchyLevel() < $this->roleHierarchyLevel();
     }
 
+    public function hasRole(string $role): bool
+    {
+        return $this->role?->slug === $role;
+    }
+
+    /**
+     * @param  array<int, string>  $roles
+     */
+    public function hasAnyRole(array $roles): bool
+    {
+        if ($roles === []) {
+            return true;
+        }
+
+        $userRole = $this->role?->slug;
+
+        if ($userRole === null) {
+            return false;
+        }
+
+        return in_array($userRole, $roles, true);
+    }
+
     public function scopeExcludeUser(Builder $query, ?int $userId): Builder
     {
         if ($userId === null) {

@@ -46,7 +46,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
             ],
             'auth' => [
-                'user' => $request->user(),
+                'user' => fn () => $request->user()?->loadMissing('role:id,name,slug'),
             ],
         ]);
     }

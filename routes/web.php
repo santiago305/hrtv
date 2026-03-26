@@ -35,9 +35,11 @@ Route::middleware(['auth'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    Route::get('dashboard/users', [UserController::class, 'index'])->name('users.index');
-    Route::post('dashboard/users', [UserController::class, 'store'])->name('users.store');
-    Route::patch('dashboard/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+    Route::middleware('role:admin')->group(function () {
+        Route::get('dashboard/users', [UserController::class, 'index'])->name('users.index');
+        Route::post('dashboard/users', [UserController::class, 'store'])->name('users.store');
+        Route::patch('dashboard/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+    });
 });
 
 require __DIR__.'/settings.php';
