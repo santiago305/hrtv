@@ -1,7 +1,9 @@
 import {
   type ReactNode,
   type RefObject,
+  useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -49,6 +51,163 @@ type PopoverProps = {
   closeButtonClassName?: string;
 };
 
+type PositionState = {
+  top: number;
+  left: number;
+  ready: boolean;
+  resolvedPlacement: PopoverPlacement;
+  width: number;
+  height: number;
+};
+
+const VIEWPORT_PADDING = 8;
+const POSITION_EPSILON = 2;
+const SIZE_EPSILON = 1;
+
+function isCloseEnough(a: number, b: number, epsilon: number) {
+  return Math.abs(a - b) <= epsilon;
+}
+
+function getCoords(
+  selectedPlacement: PopoverPlacement,
+  anchorRect: DOMRect,
+  popRect: DOMRect,
+  offset: number
+) {
+  switch (selectedPlacement) {
+    case "bottom-start":
+      return {
+        top: anchorRect.bottom + offset,
+        left: anchorRect.left,
+      };
+
+    case "bottom-end":
+      return {
+        top: anchorRect.bottom + offset,
+        left: anchorRect.right - popRect.width,
+      };
+
+    case "top-start":
+      return {
+        top: anchorRect.top - popRect.height - offset,
+        left: anchorRect.left,
+      };
+
+    case "top-end":
+      return {
+        top: anchorRect.top - popRect.height - offset,
+        left: anchorRect.right - popRect.width,
+      };
+
+    case "right-start":
+      return {
+        top: anchorRect.top,
+        left: anchorRect.right + offset,
+      };
+
+    case "left-start":
+      return {
+        top: anchorRect.top,
+        left: anchorRect.left - popRect.width - offset,
+      };
+
+    default:
+      return {
+        top: anchorRect.bottom + offset,
+        left: anchorRect.left,
+      };
+  }
+}
+
+function fitsInViewport(
+  coords: { top: number; left: number },
+  popRect: DOMRect
+) {
+  return {
+    vertically:
+      coords.top >= VIEWPORT_PADDING &&
+      coords.top + popRect.height <= window.innerHeight - VIEWPORT_PADDING,
+    horizontally:
+      coords.left >= VIEWPORT_PADDING &&
+      coords.left + popRect.width <= window.innerWidth - VIEWPORT_PADDING,
+  };
+}
+
+function clampToViewport(
+  coords: { top: number; left: number },
+  popRect: DOMRect
+) {
+  const maxLeft = Math.max(
+    VIEWPORT_PADDING,
+    window.innerWidth - popRect.width - VIEWPORT_PADDING
+  );
+  const maxTop = Math.max(
+    VIEWPORT_PADDING,
+    window.innerHeight - popRect.height - VIEWPORT_PADDING
+  );
+
+  return {
+    top: Math.max(VIEWPORT_PADDING, Math.min(coords.top, maxTop)),
+    left: Math.max(VIEWPORT_PADDING, Math.min(coords.left, maxLeft)),
+  };
+}
+
+function resolvePlacement(
+  preferredPlacement: PopoverPlacement,
+  anchorRect: DOMRect,
+  popRect: DOMRect,
+  offset: number
+) {
+  const candidates: PopoverPlacement[] = [preferredPlacement];
+
+  switch (preferredPlacement) {
+    case "bottom-start":
+      candidates.push("top-start", "bottom-end", "top-end");
+      break;
+    case "bottom-end":
+      candidates.push("top-end", "bottom-start", "top-start");
+      break;
+    case "top-start":
+      candidates.push("bottom-start", "top-end", "bottom-end");
+      break;
+    case "top-end":
+      candidates.push("bottom-end", "top-start", "bottom-start");
+      break;
+    case "right-start":
+      candidates.push("left-start", "bottom-start", "top-start");
+      break;
+    case "left-start":
+      candidates.push("right-start", "bottom-start", "top-start");
+      break;
+  }
+
+  for (const candidate of candidates) {
+    const coords = getCoords(candidate, anchorRect, popRect, offset);
+    const fit = fitsInViewport(coords, popRect);
+    const isVertical =
+      candidate.startsWith("top") || candidate.startsWith("bottom");
+
+    if ((isVertical && fit.vertically) || (!isVertical && fit.horizontally)) {
+      return {
+        placement: candidate,
+        coords: clampToViewport(coords, popRect),
+      };
+    }
+  }
+
+  const fallbackCoords = getCoords(
+    preferredPlacement,
+    anchorRect,
+    popRect,
+    offset
+  );
+
+  return {
+    placement: preferredPlacement,
+    coords: clampToViewport(fallbackCoords, popRect),
+  };
+}
+
 export function Popover({
   open,
   onClose,
@@ -76,58 +235,95 @@ export function Popover({
 }: PopoverProps) {
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const canClose = !preventClose;
-  const [position, setPosition] = useState({ top: 0, left: 0 });
+
+  const [position, setPosition] = useState<PositionState>({
+    top: 0,
+    left: 0,
+    ready: false,
+    resolvedPlacement: placement,
+    width: 0,
+    height: 0,
+  });
+
+  const updatePosition = useCallback(() => {
+    const anchor = anchorRef.current;
+    const popover = popoverRef.current;
+
+    if (!anchor || !popover) return;
+
+    const anchorRect = anchor.getBoundingClientRect();
+    const popRect = popover.getBoundingClientRect();
+
+    if (popRect.width === 0 || popRect.height === 0) return;
+
+    const next = resolvePlacement(placement, anchorRect, popRect, offset);
+
+    setPosition((prev) => {
+      const sameTop = isCloseEnough(prev.top, next.coords.top, POSITION_EPSILON);
+      const sameLeft = isCloseEnough(
+        prev.left,
+        next.coords.left,
+        POSITION_EPSILON
+      );
+      const sameWidth = isCloseEnough(prev.width, popRect.width, SIZE_EPSILON);
+      const sameHeight = isCloseEnough(
+        prev.height,
+        popRect.height,
+        SIZE_EPSILON
+      );
+      const samePlacement = prev.resolvedPlacement === next.placement;
+
+      if (
+        prev.ready &&
+        sameTop &&
+        sameLeft &&
+        sameWidth &&
+        sameHeight &&
+        samePlacement
+      ) {
+        return prev;
+      }
+
+      return {
+        top: next.coords.top,
+        left: next.coords.left,
+        ready: true,
+        resolvedPlacement: next.placement,
+        width: popRect.width,
+        height: popRect.height,
+      };
+    });
+  }, [anchorRef, placement, offset]);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+
+    let raf1 = 0;
+    let raf2 = 0;
+
+    updatePosition();
+
+    raf1 = requestAnimationFrame(() => {
+      updatePosition();
+
+      raf2 = requestAnimationFrame(() => {
+        updatePosition();
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
+  }, [open, updatePosition]);
 
   useEffect(() => {
     if (!open) return;
 
-    const updatePosition = () => {
-      const anchor = anchorRef.current;
-      const popover = popoverRef.current;
-      if (!anchor || !popover) return;
+    const anchor = anchorRef.current;
+    const popover = popoverRef.current;
 
-      const rect = anchor.getBoundingClientRect();
-      const popRect = popover.getBoundingClientRect();
-
-      let top = 0;
-      let left = 0;
-
-      switch (placement) {
-        case "bottom-start":
-          top = rect.bottom + offset;
-          left = rect.left;
-          break;
-        case "bottom-end":
-          top = rect.bottom + offset;
-          left = rect.right - popRect.width;
-          break;
-        case "top-start":
-          top = rect.top - popRect.height - offset;
-          left = rect.left;
-          break;
-        case "top-end":
-          top = rect.top - popRect.height - offset;
-          left = rect.right - popRect.width;
-          break;
-        case "right-start":
-          top = rect.top;
-          left = rect.right + offset;
-          break;
-        case "left-start":
-          top = rect.top;
-          left = rect.left - popRect.width - offset;
-          break;
-      }
-
-      const padding = 8;
-      const maxLeft = window.innerWidth - popRect.width - padding;
-      const maxTop = window.innerHeight - popRect.height - padding;
-
-      setPosition({
-        top: Math.max(padding, Math.min(top, maxTop)),
-        left: Math.max(padding, Math.min(left, maxLeft)),
-      });
-    };
+    if (!anchor || !popover) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && closeOnEscape && canClose) {
@@ -139,22 +335,30 @@ export function Popover({
       if (!closeOnOutsideClick || !canClose) return;
 
       const target = event.target as Node;
-      const popover = popoverRef.current;
-      const anchor = anchorRef.current;
+      const currentPopover = popoverRef.current;
+      const currentAnchor = anchorRef.current;
 
-      const clickedInsidePopover = popover?.contains(target);
-      const clickedAnchor = anchor?.contains(target);
+      const clickedInsidePopover = currentPopover?.contains(target);
+      const clickedAnchor = currentAnchor?.contains(target);
 
       if (!clickedInsidePopover && !clickedAnchor) {
         onClose();
       }
     };
 
-    updatePosition();
-    requestAnimationFrame(updatePosition);
+    const handleResize = () => {
+      updatePosition();
+    };
 
-    window.addEventListener("resize", updatePosition);
-    window.addEventListener("scroll", updatePosition, true);
+    const resizeObserver = new ResizeObserver(() => {
+      updatePosition();
+    });
+
+    resizeObserver.observe(anchor);
+    resizeObserver.observe(popover);
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("scroll", updatePosition);
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("mousedown", handlePointerDown);
 
@@ -165,22 +369,35 @@ export function Popover({
     }
 
     return () => {
-      window.removeEventListener("resize", updatePosition);
-      window.removeEventListener("scroll", updatePosition, true);
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("scroll", updatePosition);
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("mousedown", handlePointerDown);
     };
   }, [
     open,
     anchorRef,
-    placement,
-    offset,
     closeOnEscape,
     closeOnOutsideClick,
     canClose,
     onClose,
     initialFocusRef,
+    updatePosition,
   ]);
+
+  useEffect(() => {
+    if (!open) {
+      setPosition({
+        top: 0,
+        left: 0,
+        ready: false,
+        resolvedPlacement: placement,
+        width: 0,
+        height: 0,
+      });
+    }
+  }, [open, placement]);
 
   const animationProps =
     animation === "slide"
@@ -195,6 +412,19 @@ export function Popover({
           exit: { opacity: 0, scale: 0.98 },
         };
 
+  const transformOriginClass =
+    position.resolvedPlacement === "bottom-start"
+      ? "origin-top-left"
+      : position.resolvedPlacement === "bottom-end"
+        ? "origin-top-right"
+        : position.resolvedPlacement === "top-start"
+          ? "origin-bottom-left"
+          : position.resolvedPlacement === "top-end"
+            ? "origin-bottom-right"
+            : position.resolvedPlacement === "right-start"
+              ? "origin-left-top"
+              : "origin-right-top";
+
   return (
     <AnimatePresence>
       {open && (
@@ -203,14 +433,16 @@ export function Popover({
           role="dialog"
           aria-modal="false"
           className={cn(
-            "fixed z-50 flex max-h-[calc(100vh-1rem)] w-auto min-w-55 max-w-[calc(100vw-1rem)] flex-col overflow-hidden",
+            "fixed z-50 flex max-h-[calc(100vh-1rem)] min-w-[22rem] max-w-[calc(100vw-1rem)] flex-col overflow-hidden",
             "rounded-2xl border border-zinc-200/80 bg-white",
             "shadow-[0_16px_40px_-16px_rgba(0,0,0,0.22)]",
+            transformOriginClass,
             className
           )}
           style={{
             top: position.top,
             left: position.left,
+            visibility: position.ready ? "visible" : "hidden",
           }}
           transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
           {...animationProps}
@@ -251,7 +483,7 @@ export function Popover({
                   type="button"
                   onClick={onClose}
                   className={cn(
-                    "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900",
+                    "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900",
                     closeButtonClassName
                   )}
                   aria-label="Cerrar popover"
@@ -262,7 +494,14 @@ export function Popover({
             </div>
           )}
 
-          <div className={cn("scroll-y-stable px-4 py-4", bodyClassName)}>{children}</div>
+          <div
+            className={cn(
+              "scroll-y-stable overflow-y-auto px-4 py-4",
+              bodyClassName
+            )}
+          >
+            {children}
+          </div>
 
           {footer && (
             <div
