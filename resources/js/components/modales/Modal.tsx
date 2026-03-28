@@ -82,9 +82,22 @@ export function Modal({
     document.addEventListener("keydown", handleKeyDown);
 
     const previousOverflow = document.body.style.overflow;
+    const previousPaddingRight = document.body.style.paddingRight;
 
     if (lockScroll) {
+      const scrollbarWidth =
+        window.innerWidth - document.documentElement.clientWidth;
+      const computedPaddingRight = Number.parseFloat(
+        window.getComputedStyle(document.body).paddingRight
+      );
+
       document.body.style.overflow = "hidden";
+
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${
+          computedPaddingRight + scrollbarWidth
+        }px`;
+      }
     }
 
     if (initialFocusRef?.current) {
@@ -96,6 +109,7 @@ export function Modal({
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = previousOverflow;
+      document.body.style.paddingRight = previousPaddingRight;
     };
   }, [open, closeOnEscape, canClose, onClose, lockScroll, initialFocusRef]);
 
@@ -204,7 +218,7 @@ export function Modal({
                 </div>
               )}
 
-              <div className="scroll-y-stable min-h-0 flex-1">
+              <div className="scroll-gutter-stable-y scrollbar-app min-h-0 flex-1 overflow-y-auto">
                 <div className={cn("px-4 py-4", bodyClassName)}>{children}</div>
               </div>
 

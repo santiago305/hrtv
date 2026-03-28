@@ -496,7 +496,7 @@ export function Popover({
 
           <div
             className={cn(
-              "scroll-y-stable overflow-y-auto px-2 pb-2",
+              "scrollbar-app overflow-y-auto px-2 pb-2",
               bodyClassName
             )}
           >

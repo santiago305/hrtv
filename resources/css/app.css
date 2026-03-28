@@ -188,14 +188,43 @@
 
   .scroll-stable {
     overflow: auto;
-    scrollbar-gutter: stable;
     scrollbar-width: thin;
   }
 
   .scroll-y-stable {
     overflow-y: auto;
-    scrollbar-gutter: stable;
     scrollbar-width: thin;
+  }
+
+  .scroll-gutter-stable {
+    scrollbar-gutter: stable;
+  }
+
+  .scroll-gutter-stable-y {
+    scrollbar-gutter: stable both-edges;
+  }
+  
+  .scrollbar-app {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) hsl(var(--surface));
+  }
+
+  .scrollbar-app::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-app::-webkit-scrollbar-track {
+    background: hsl(var(--surface));
+  }
+
+  .scrollbar-app::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 9999px;
+  }
+
+  .scrollbar-app::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
   }
 
   .scroll-x-thin {
