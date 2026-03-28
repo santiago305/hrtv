@@ -19,7 +19,7 @@ class UserController extends Controller
         $currentUser = $request->user();
 
         $users = User::query()
-            ->select(['id', 'name', 'email', 'role_id', 'is_active', 'email_verified_at', 'created_at'])
+            ->select(['id', 'name', 'email', 'role_id', 'is_active', 'email_verified_at', 'created_at', 'profile_photo_path'])
             ->excludeUser($currentUser?->id)
             ->with(['role:id,name,slug'])
             ->latest()
@@ -29,6 +29,7 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'avatar' => $user->avatar,
                 'role' => $user->role ? [
                     'id' => $user->role->id,
                     'name' => $user->role->name,

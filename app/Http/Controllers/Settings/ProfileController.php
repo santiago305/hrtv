@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Actions\Media\UploadImageAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -27,15 +29,34 @@ class ProfileController extends Controller
     /**
      * Update the user's profile settings.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request, UploadImageAction $uploadImageAction): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->safe()->except(['avatar', 'remove_avatar']));
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        if ($request->boolean('remove_avatar') && $user->profile_photo_path) {
+            Storage::disk(config('media.disk', 'public'))->delete($user->profile_photo_path);
+            $user->profile_photo_path = null;
+        }
+
+        if ($request->hasFile('avatar')) {
+            $newPath = $uploadImageAction->execute(
+                $request->file('avatar'),
+                'uploads/images/avatars'
+            );
+
+            if ($user->profile_photo_path) {
+                Storage::disk(config('media.disk', 'public'))->delete($user->profile_photo_path);
+            }
+
+            $user->profile_photo_path = $newPath;
+        }
+
+        $user->save();
 
         return to_route('profile.edit');
     }

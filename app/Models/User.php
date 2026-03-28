@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -26,6 +27,11 @@ class User extends Authenticatable
         'email_verified_at',
         'is_active',
         'password',
+        'profile_photo_path',
+    ];
+
+    protected $appends = [
+        'avatar',
     ];
 
     /**
@@ -97,5 +103,14 @@ class User extends Authenticatable
         }
 
         return $query->whereKeyNot($userId);
+    }
+
+    public function getAvatarAttribute(): ?string
+    {
+        if (! $this->profile_photo_path) {
+            return null;
+        }
+
+        return Storage::disk(config('media.disk', 'public'))->url($this->profile_photo_path);
     }
 }

@@ -29,10 +29,13 @@ class ImageConverter
             throw new RuntimeException('No se pudo leer el archivo temporal de imagen.');
         }
 
+        if ($extension === 'webp') {
+            return $this->storeWebpWithoutConversion($file, $targetDirectory, $diskName);
+        }
+
         $image = match ($extension) {
             'jpg', 'jpeg' => @imagecreatefromjpeg($sourcePath),
             'png' => @imagecreatefrompng($sourcePath),
-            'webp' => @imagecreatefromwebp($sourcePath),
             default => throw new RuntimeException("Formato de imagen no soportado: {$extension}."),
         };
 
@@ -40,7 +43,7 @@ class ImageConverter
             throw new RuntimeException('No se pudo abrir la imagen para convertirla a WebP.');
         }
 
-        if (in_array($extension, ['png', 'webp'], true)) {
+        if ($extension === 'png') {
             imagepalettetotruecolor($image);
             imagealphablending($image, true);
             imagesavealpha($image, true);
@@ -78,7 +81,25 @@ class ImageConverter
             '%s/%s-%s.webp',
             $directory,
             $slug,
-            Str::lower(Str::ulid())
+            Str::lower((string) Str::ulid())
         );
+    }
+
+    private function storeWebpWithoutConversion(UploadedFile $file, string $directory, string $disk): string
+    {
+        $relativePath = $this->buildRelativePath($file, $directory);
+        $stream = fopen($file->getRealPath(), 'rb');
+
+        if ($stream === false) {
+            throw new RuntimeException('No se pudo leer el archivo WebP temporal.');
+        }
+
+        try {
+            Storage::disk($disk)->put($relativePath, $stream);
+        } finally {
+            fclose($stream);
+        }
+
+        return $relativePath;
     }
 }
