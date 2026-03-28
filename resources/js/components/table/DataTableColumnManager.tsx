@@ -71,7 +71,7 @@ export function DataTableColumnManager({ columns, visibleColumnIds, orderedColum
                     </button>
                 </div>
 
-                <div className="max-h-[min(70vh,26rem)] space-y-2 overflow-y-auto pr-1">
+                <div className="scrollbar-panel max-h-[min(70vh,26rem)] space-y-2 overflow-y-auto pr-1">
                     {orderedColumns.map((column) => {
                         const checked = visibleColumnIds.includes(column.id);
                         const isPinned = !!column.pinned;

@@ -420,7 +420,7 @@ export function DataTable<T extends Record<string, unknown>>({
             ) : null}
 
             <div className="relative hidden rounded-sm border border-border/70 bg-background shadow-sm md:block">
-                <div className="scroll-x-thin max-h-[90vh] overflow-y-auto rounded-sm">
+                <div className="scrollbar-panel max-h-[90vh] overflow-auto rounded-sm">
                     <table className={cn('w-full min-w-full text-xs', tableClassName)}>
                         <thead
                             className={cn(

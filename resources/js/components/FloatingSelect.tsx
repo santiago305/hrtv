@@ -164,7 +164,7 @@ export function FloatingSelect({
                                 </div>
                             )}
 
-                            <div className="max-h-64 overflow-y-auto py-1">
+                            <div className="scrollbar-panel max-h-64 overflow-y-auto py-1">
                                 {filteredOptions.length === 0 ? (
                                     <div className="px-3 py-2 text-xs text-muted-foreground">{emptyMessage}</div>
                                 ) : (
