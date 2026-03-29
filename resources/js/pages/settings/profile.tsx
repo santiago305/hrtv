@@ -26,7 +26,8 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
     const getInitials = useInitials();
     const [previewUrl, setPreviewUrl] = useState<string | null>(auth.user.avatar ?? null);
 
-    const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
+    const { data, setData, post, transform, errors, processing, recentlySuccessful } = useForm({
+        _method: 'patch' as const,
         name: auth.user.name,
         email: auth.user.email,
         avatar: null as File | null,
@@ -48,7 +49,13 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        patch(route('profile.update'), {
+        transform((current) => ({
+            ...current,
+            name: current.name?.trim() || auth.user.name,
+            email: current.email?.trim() || auth.user.email,
+        }));
+
+        post(route('profile.update'), {
             forceFormData: true,
         });
     };
@@ -75,7 +82,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                     <div className="min-w-0">
                                         <p className="text-sm font-medium text-foreground">Foto de perfil</p>
                                         <p className="mt-1 max-w-md text-sm leading-5 text-muted-foreground">
-                                            Opcional. JPG y PNG se convierten automaticamente a WebP.
+                                            Solo se permite formato WEBP.
                                         </p>
                                     </div>
                                 </div>
@@ -87,7 +94,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
                                         <input
                                             type="file"
-                                            accept="image/jpeg,image/png,image/webp"
+                                            accept="image/webp"
                                             className="sr-only"
                                             onChange={(e) => {
                                                 const file = e.target.files?.[0] ?? null;
@@ -160,8 +167,9 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 type="email"
                                 className="mt-1 block w-full"
                                 value={data.email}
-                                onChange={(e) => setData('email', e.target.value)}
-                                required
+                                readOnly
+                                disabled
+                                aria-readonly="true"
                                 autoComplete="username"
                                 placeholder="Correo electronico"
                             />
