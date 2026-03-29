@@ -318,3 +318,7 @@
     overflow: hidden;
   }
 }
+
+.text-color-red-sans {
+  color: hsl(0 100% 50%);
+}

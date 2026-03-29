@@ -34,9 +34,9 @@ export default function DeleteUser() {
         <div className="space-y-6">
             <HeadingSmall title="Eliminar cuenta" description="Elimina tu cuenta y todos sus recursos" />
             <div className="space-y-4 rounded-lg border border-red-200 bg-red-50/80 p-4 dark:border-red-200/10 dark:bg-red-700/10">
-                <div className="relative space-y-0.5 text-red-700 dark:text-red-100">
-                    <p className="font-semibold">Advertencia</p>
-                    <p className="text-sm text-red-600 dark:text-red-100/90">Esta acción eliminará tu cuenta de forma permanente y no se puede deshacer.</p>
+                <div className="relative space-y-0.5">
+                    <p className="font-semibold text-red-700 dark:text-red-100 text-color-red-sans">Advertencia</p>
+                    <p className="text-sm text-red-600 dark:text-red-100/90 text-color-red-sans">Esta acción eliminará tu cuenta de forma permanente y no se puede deshacer.</p>
                 </div>
 
                 <Dialog>

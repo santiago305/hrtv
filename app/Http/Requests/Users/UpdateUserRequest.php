@@ -31,7 +31,24 @@ class UpdateUserRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'name.required' => 'El nombre es obligatorio.',
+            'name.max' => 'El nombre no debe superar los 255 caracteres.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'Ingresa un correo electrónico válido.',
+            'email.unique' => 'Este correo electrónico ya está registrado.',
+            'email.max' => 'El correo electrónico no debe superar los 255 caracteres.',
+            'role_id.required' => 'El rol es obligatorio.',
+            'role_id.integer' => 'El rol seleccionado no es válido.',
             'role_id.in' => 'No puedes actualizar usuarios con este rol.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'name' => 'nombre',
+            'email' => 'correo electrónico',
+            'role_id' => 'rol',
         ];
     }
 }

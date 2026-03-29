@@ -32,6 +32,23 @@ class LoginRequest extends FormRequest
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'Ingresa un correo electrónico válido.',
+            'password.required' => 'La contraseña es obligatoria.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'email' => 'correo electrónico',
+            'password' => 'contraseña',
+        ];
+    }
+
     /**
      * Attempt to authenticate the request's credentials.
      *
@@ -45,7 +62,7 @@ class LoginRequest extends FormRequest
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
+                'email' => 'Las credenciales proporcionadas no son correctas.',
             ]);
         }
 
@@ -66,12 +83,10 @@ class LoginRequest extends FormRequest
         event(new Lockout($this));
 
         $seconds = RateLimiter::availableIn($this->throttleKey());
+        $minutes = (int) ceil($seconds / 60);
 
         throw ValidationException::withMessages([
-            'email' => __('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
+            'email' => "Demasiados intentos de inicio de sesión. Inténtalo de nuevo en {$seconds} segundos o aproximadamente {$minutes} minuto(s).",
         ]);
     }
 

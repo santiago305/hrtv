@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -40,6 +42,18 @@ Route::middleware(['auth'])->group(function () {
         Route::post('dashboard/users', [UserController::class, 'store'])->name('users.store');
         Route::patch('dashboard/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::patch('dashboard/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+
+        Route::get('dashboard/categories', [CategoryController::class, 'index'])->name('categories.index');
+        Route::post('dashboard/categories', [CategoryController::class, 'store'])->name('categories.store');
+        Route::get('dashboard/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+        Route::patch('dashboard/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+        Route::patch('dashboard/categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
+
+        Route::get('dashboard/sub-categories', [SubCategoryController::class, 'index'])->name('sub-categories.index');
+        Route::post('dashboard/sub-categories', [SubCategoryController::class, 'store'])->name('sub-categories.store');
+        Route::get('dashboard/sub-categories/{subCategory}', [SubCategoryController::class, 'show'])->name('sub-categories.show');
+        Route::patch('dashboard/sub-categories/{subCategory}', [SubCategoryController::class, 'update'])->name('sub-categories.update');
+        Route::patch('dashboard/sub-categories/{subCategory}/toggle-status', [SubCategoryController::class, 'toggleStatus'])->name('sub-categories.toggle-status');
     });
 });
 

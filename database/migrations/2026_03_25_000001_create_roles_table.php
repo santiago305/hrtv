@@ -14,10 +14,18 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->timestamps();
         });
+
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreign('role_id')->references('id')->on('roles')->nullOnDelete();
+        });
     }
 
     public function down(): void
     {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['role_id']);
+        });
+
         Schema::dropIfExists('roles');
     }
 };
