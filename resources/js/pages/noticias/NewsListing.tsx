@@ -1,11 +1,13 @@
 import { router, usePage } from '@inertiajs/react';
 import { AdPlaceholder } from '@/components/AdPlaceholder';
 import { NewsCard } from '@/components/NewsCard';
-import { categories, mockArticles } from '@/data/mockData';
+import { mockArticles } from '@/data/mockData';
 import PublicSiteLayout from '@/layouts/public-site-layout';
+import type { NewsCategory } from '@/types/news';
 
 export default function NewsListingPage() {
-  const { url } = usePage();
+  const { url, props } = usePage<{ categories: NewsCategory[] }>();
+  const categories = props.categories ?? [];
   const searchParams = new URLSearchParams(url.split('?')[1] ?? '');
   const activeCategory = searchParams.get('categoria') || '';
   const activeSubcategory = searchParams.get('subcategoria') || '';

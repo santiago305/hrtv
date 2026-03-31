@@ -3,7 +3,9 @@
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\UserController;
+use App\Models\Category;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -11,7 +13,26 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/noticias', function () {
-    return Inertia::render('noticias/NewsListing');
+    $categories = Category::query()
+        ->where('is_active', true)
+        ->with(['subCategories' => fn ($query) => $query->where('is_active', true)->orderBy('name')])
+        ->orderBy('name')
+        ->get()
+        ->map(fn (Category $category) => [
+            'id' => (string) $category->id,
+            'name' => $category->name,
+            'slug' => Str::slug($category->name),
+            'subcategories' => $category->subCategories->map(fn ($subCategory) => [
+                'id' => (string) $subCategory->id,
+                'name' => $subCategory->name,
+                'slug' => Str::slug($subCategory->name),
+                'categoryId' => (string) $category->id,
+            ])->values(),
+        ])->values();
+
+    return Inertia::render('noticias/NewsListing', [
+        'categories' => $categories,
+    ]);
 })->name('news.index');
 
 Route::get('/noticias/{slug}', function (string $slug) {
