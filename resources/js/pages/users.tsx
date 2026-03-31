@@ -25,7 +25,7 @@ export default function UsersIndex() {
         email: '',
         password: '',
         password_confirmation: '',
-        role_id: roles[0] ? String(roles[0].id) : '',
+        role_id: '',
     });
 
     return (
@@ -47,7 +47,7 @@ export default function UsersIndex() {
                                 onSubmit={(event) => {
                                     event.preventDefault();
                                     post(route('users.store'), {
-                                        onSuccess: () => reset('name', 'email', 'password', 'password_confirmation'),
+                                        onSuccess: () => reset('name', 'email', 'password', 'password_confirmation', 'role_id'),
                                     });
                                 }}
                             />

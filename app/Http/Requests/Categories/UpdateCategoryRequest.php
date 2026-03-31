@@ -23,18 +23,18 @@ class UpdateCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'El nombre de la categorÃ­a es obligatorio.',
-            'name.max' => 'El nombre de la categorÃ­a no debe superar los 150 caracteres.',
-            'name.unique' => 'Ya existe una categorÃ­a con este nombre.',
-            'description.string' => 'La descripciÃ³n de la categorÃ­a debe ser un texto vÃ¡lido.',
+            'name.required' => 'El nombre de la categoría es obligatorio.',
+            'name.max' => 'El nombre de la categoría no debe superar los 150 caracteres.',
+            'name.unique' => 'Ya existe una categoría con este nombre.',
+            'description.string' => 'La descripción de la categoría debe ser un texto válido.',
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'name' => 'nombre de la categorÃ­a',
-            'description' => 'descripciÃ³n de la categorÃ­a',
+            'name' => 'nombre de la categoría',
+            'description' => 'descripción de la categoría',
         ];
     }
 }

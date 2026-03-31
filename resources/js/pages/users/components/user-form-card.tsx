@@ -70,7 +70,7 @@ export function UserFormCard({
                 />
 
                 <FloatingSelect
-                    label="Rol"
+                    label="Selecciona un rol"
                     name="role_id"
                     value={data.role_id}
                     options={roles.map((role) => ({
@@ -79,7 +79,7 @@ export function UserFormCard({
                     }))}
                     onChange={(value) => onChange('role_id', value)}
                     error={errors.role_id}
-                    placeholder="Selecciona un rol"
+                    placeholder=""
                     disabled={processing || !canCreateUsers}
                 />
 

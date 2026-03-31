@@ -236,7 +236,7 @@
   .scrollbar-panel {
     scrollbar-gutter: stable both-edges;
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--border)) hsl(var(--surface-alt));
+    scrollbar-color: hsl(var(--border)) hsl(var(--surface));
   }
 
   .scrollbar-panel::-webkit-scrollbar {
@@ -245,18 +245,18 @@
   }
 
   .scrollbar-panel::-webkit-scrollbar-track {
-    background: hsl(var(--surface-alt));
+    background: linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--muted)) 100%);
     border-radius: 9999px;
   }
 
   .scrollbar-panel::-webkit-scrollbar-thumb {
-    background: hsl(var(--border));
-    border: 2px solid hsl(var(--surface-alt));
+    background: linear-gradient(180deg, hsl(var(--border)) 0%, hsl(var(--muted-foreground) / 0.45) 100%);
+    border: 2px solid hsl(var(--surface));
     border-radius: 9999px;
   }
 
   .scrollbar-panel::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground));
+    background: linear-gradient(180deg, hsl(var(--muted-foreground)) 0%, hsl(var(--foreground) / 0.45) 100%);
   }
 
   .scrollbar-panel::-webkit-scrollbar-button,

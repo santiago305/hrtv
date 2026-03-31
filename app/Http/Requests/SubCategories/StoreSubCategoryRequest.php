@@ -30,22 +30,22 @@ class StoreSubCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'category_id.required' => 'La categorÃ­a es obligatoria.',
-            'category_id.integer' => 'La categorÃ­a seleccionada no es vÃ¡lida.',
-            'category_id.exists' => 'La categorÃ­a seleccionada no existe.',
-            'name.required' => 'El nombre de la subcategorÃ­a es obligatorio.',
-            'name.max' => 'El nombre de la subcategorÃ­a no debe superar los 150 caracteres.',
-            'name.unique' => 'Ya existe una subcategorÃ­a con este nombre en la categorÃ­a seleccionada.',
-            'description.string' => 'La descripciÃ³n de la subcategorÃ­a debe ser un texto vÃ¡lido.',
+            'category_id.required' => 'La categoría es obligatoria.',
+            'category_id.integer' => 'La categoría seleccionada no es válida.',
+            'category_id.exists' => 'La categoría seleccionada no existe.',
+            'name.required' => 'El nombre de la subcategoría es obligatorio.',
+            'name.max' => 'El nombre de la subcategoría no debe superar los 150 caracteres.',
+            'name.unique' => 'Ya existe una subcategoría con este nombre en la categoría seleccionada.',
+            'description.string' => 'La descripción de la subcategoría debe ser un texto válido.',
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'category_id' => 'categorÃ­a',
-            'name' => 'nombre de la subcategorÃ­a',
-            'description' => 'descripciÃ³n de la subcategorÃ­a',
+            'category_id' => 'categoría',
+            'name' => 'nombre de la subcategoría',
+            'description' => 'descripción de la subcategoría',
         ];
     }
 }
