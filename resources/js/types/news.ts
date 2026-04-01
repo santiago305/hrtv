@@ -2,6 +2,7 @@ export interface NewsCategory {
   id: string;
   name: string;
   slug: string;
+  newsCount?: number;
   subcategories?: NewsSubCategory[];
 }
 

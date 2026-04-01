@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { usePage } from '@inertiajs/react';
 import { Heart, Share2 } from 'lucide-react';
 import { AdPlaceholder } from '@/components/AdPlaceholder';
 import { NewsCard } from '@/components/NewsCard';
-import { mockArticles } from '@/data/mockData';
 import PublicSiteLayout from '@/layouts/public-site-layout';
+import type { NewsArticle } from '@/types/news';
 import AudioNews from '../news/components/AudioNews';
 import CarouselNews from '../news/components/CarouselNews';
 import DescriptionNews from '../news/components/DescriptionNews';
@@ -12,19 +13,14 @@ import NewsMeta from '../news/components/NewsMeta';
 import TitleNews from '../news/components/TitleNews';
 import VideoNews from '../news/components/VideoNews';
 
-interface NewsDetailPageProps {
-  slug: string;
-}
+type NewsDetailPageProps = {
+  article: NewsArticle;
+  sidebarArticles: NewsArticle[];
+};
 
-export default function NewsDetailPage({ slug }: NewsDetailPageProps) {
+export default function NewsDetailPage() {
   const [liked, setLiked] = useState(false);
-
-  const article = mockArticles.find((a) => a.slug === slug) || mockArticles[0];
-  const relatedArticles = mockArticles
-    .filter((a) => a.id !== article.id && a.category.id === article.category.id)
-    .slice(0, 5);
-  const moreRelated = mockArticles.filter((a) => a.id !== article.id).slice(0, 5);
-  const sidebarArticles = relatedArticles.length > 0 ? relatedArticles : moreRelated;
+  const { article, sidebarArticles = [] } = usePage<NewsDetailPageProps>().props;
   const articleImages = article.images && article.images.length > 0 ? article.images : [article.image];
   const articleVideos = article.videoUrl ? [article.videoUrl] : [];
 
@@ -42,11 +38,11 @@ export default function NewsDetailPage({ slug }: NewsDetailPageProps) {
               <span className="bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
                 {article.category.name}
               </span>
-              {article.subcategory && (
+              {article.subcategory ? (
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {article.subcategory.name}
                 </span>
-              )}
+              ) : null}
             </div>
 
             <TitleNews title={article.title} />
@@ -97,8 +93,8 @@ export default function NewsDetailPage({ slug }: NewsDetailPageProps) {
                 Mas noticias de {article.category.name}
               </h3>
               <div className="space-y-0">
-                {sidebarArticles.map((a) => (
-                  <NewsCard key={a.id} article={a} variant="compact" />
+                {sidebarArticles.map((item) => (
+                  <NewsCard key={item.id} article={item} variant="compact" />
                 ))}
               </div>
             </div>

@@ -1,27 +1,38 @@
 import { router, usePage } from '@inertiajs/react';
 import { AdPlaceholder } from '@/components/AdPlaceholder';
 import { NewsCard } from '@/components/NewsCard';
-import { mockArticles } from '@/data/mockData';
+import { DataTablePagination } from '@/components/table/DataTablePagination';
 import PublicSiteLayout from '@/layouts/public-site-layout';
-import type { NewsCategory } from '@/types/news';
+import type { NewsArticle, NewsCategory } from '@/types/news';
+import type { DataTablePaginationMeta } from '@/components/table/types';
+
+type NewsListingPageProps = {
+  categories: NewsCategory[];
+  articles: NewsArticle[];
+  pagination: DataTablePaginationMeta;
+  activeCategory: string;
+  activeSubcategory: string;
+};
 
 export default function NewsListingPage() {
-  const { url, props } = usePage<{ categories: NewsCategory[] }>();
+  const { props } = usePage<NewsListingPageProps>();
   const categories = props.categories ?? [];
-  const searchParams = new URLSearchParams(url.split('?')[1] ?? '');
-  const activeCategory = searchParams.get('categoria') || '';
-  const activeSubcategory = searchParams.get('subcategoria') || '';
+  const articles = props.articles ?? [];
+  const pagination = props.pagination;
+  const activeCategory = props.activeCategory ?? '';
+  const activeSubcategory = props.activeSubcategory ?? '';
 
   const selectedCategory = categories.find((c) => c.slug === activeCategory);
 
-  const filteredArticles = mockArticles.filter((a) => {
-    if (activeSubcategory) return a.subcategory?.slug === activeSubcategory;
-    if (activeCategory) return a.category.slug === activeCategory;
-    return true;
-  });
+  const buildRoute = (page: number, params: Record<string, string> = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const path = page <= 1 ? route('news.index') : route('news.index', { page });
+
+    return query.length > 0 ? `${path}?${query}` : path;
+  };
 
   const updateFilters = (params: Record<string, string>) => {
-    router.get(route('news.index'), params, {
+    router.get(buildRoute(1, params), {}, {
       preserveState: true,
       preserveScroll: true,
       replace: true,
@@ -46,6 +57,18 @@ export default function NewsListingPage() {
     const params: Record<string, string> = { subcategoria: slug };
     if (activeCategory) params.categoria = activeCategory;
     updateFilters(params);
+  };
+
+  const handlePageChange = (page: number) => {
+    const params: Record<string, string> = {};
+    if (activeCategory) params.categoria = activeCategory;
+    if (activeSubcategory) params.subcategoria = activeSubcategory;
+
+    router.get(buildRoute(page, params), {}, {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
+    });
   };
 
   return (
@@ -104,12 +127,23 @@ export default function NewsListingPage() {
 
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            {filteredArticles.length > 0 ? (
-              <div className="grid gap-5 sm:grid-cols-2">
-                {filteredArticles.map((article) => (
-                  <NewsCard key={article.id} article={article} />
-                ))}
-              </div>
+            {articles.length > 0 ? (
+              <>
+                <div className="grid gap-5 sm:grid-cols-2">
+                  {articles.map((article) => (
+                    <NewsCard key={article.id} article={article} />
+                  ))}
+                </div>
+
+                {pagination.total > pagination.limit ? (
+                  <DataTablePagination
+                    page={pagination.page}
+                    limit={pagination.limit}
+                    total={pagination.total}
+                    onPageChange={handlePageChange}
+                  />
+                ) : null}
+              </>
             ) : (
               <div className="flex h-40 items-center justify-center border border-dashed border-border">
                 <p className="text-sm text-muted-foreground">No se encontraron noticias en esta categoria.</p>
@@ -136,7 +170,7 @@ export default function NewsListingPage() {
                     >
                       <span>{cat.name}</span>
                       <span className="text-xs text-muted-foreground">
-                        {mockArticles.filter((a) => a.category.slug === cat.slug).length}
+                        {cat.newsCount ?? 0}
                       </span>
                     </button>
                   </li>

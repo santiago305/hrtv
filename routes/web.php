@@ -11,7 +11,39 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
-Route::get('/', function () {
+$toPublicArticle = static function (News $item): array {
+    $coverUrl = Storage::disk(config('media.disk', 'public'))->url($item->cover_image);
+
+    return [
+        'id' => (string) $item->id,
+        'title' => $item->title,
+        'slug' => $item->slug,
+        'summary' => $item->excerpt ?? '',
+        'body' => $item->content,
+        'image' => $coverUrl,
+        'images' => collect($item->images ?? [])->map(fn (string $path) => Storage::disk(config('media.disk', 'public'))->url($path))->values()->all(),
+        'videoUrl' => collect($item->videos ?? [])->map(fn (string $path) => Storage::disk(config('media.disk', 'public'))->url($path))->first(),
+        'audioUrl' => $item->audio_path ? Storage::disk(config('media.disk', 'public'))->url($item->audio_path) : null,
+        'category' => [
+            'id' => (string) $item->category_id,
+            'name' => $item->category?->name ?? 'Sin categoria',
+            'slug' => Str::slug($item->category?->name ?? 'sin-categoria'),
+        ],
+        'subcategory' => $item->subCategory ? [
+            'id' => (string) $item->subCategory->id,
+            'name' => $item->subCategory->name,
+            'slug' => Str::slug($item->subCategory->name),
+            'categoryId' => (string) $item->category_id,
+        ] : null,
+        'author' => $item->author?->name ?? 'Redaccion',
+        'publishedAt' => ($item->published_at ?? $item->created_at)?->toIso8601String(),
+        'views' => $item->views_count,
+        'likes' => $item->likes_count,
+        'isBreaking' => $item->is_breaking,
+    ];
+};
+
+Route::get('/', function () use ($toPublicArticle) {
     $latestNews = News::query()
         ->with(['author:id,name', 'category:id,name', 'subCategory:id,name,category_id'])
         ->where('is_published', true)
@@ -20,53 +52,29 @@ Route::get('/', function () {
         ->take(6)
         ->get();
 
-    $toPublicArticle = static function (News $item): array {
-        $coverUrl = Storage::disk(config('media.disk', 'public'))->url($item->cover_image);
-
-        return [
-            'id' => (string) $item->id,
-            'title' => $item->title,
-            'slug' => $item->slug,
-            'summary' => $item->excerpt ?? '',
-            'body' => $item->content,
-            'image' => $coverUrl,
-            'images' => collect($item->images ?? [])->map(fn (string $path) => Storage::disk(config('media.disk', 'public'))->url($path))->values()->all(),
-            'videoUrl' => collect($item->videos ?? [])->map(fn (string $path) => Storage::disk(config('media.disk', 'public'))->url($path))->first(),
-            'audioUrl' => $item->audio_path ? Storage::disk(config('media.disk', 'public'))->url($item->audio_path) : null,
-            'category' => [
-                'id' => (string) $item->category_id,
-                'name' => $item->category?->name ?? 'Sin categoria',
-                'slug' => Str::slug($item->category?->name ?? 'sin-categoria'),
-            ],
-            'subcategory' => $item->subCategory ? [
-                'id' => (string) $item->subCategory->id,
-                'name' => $item->subCategory->name,
-                'slug' => Str::slug($item->subCategory->name),
-                'categoryId' => (string) $item->category_id,
-            ] : null,
-            'author' => $item->author?->name ?? 'Redaccion',
-            'publishedAt' => ($item->published_at ?? $item->created_at)?->toIso8601String(),
-            'views' => $item->views_count,
-            'likes' => $item->likes_count,
-            'isBreaking' => $item->is_breaking,
-        ];
-    };
-
     return Inertia::render('inicio', [
         'latestNews' => $latestNews->map($toPublicArticle)->values(),
     ]);
 })->name('home');
 
-Route::get('/noticias', function () {
+Route::get('/noticias/{page?}', function (?int $page = 1) use ($toPublicArticle) {
+    $page = max($page ?? 1, 1);
+    $activeCategory = request()->string('categoria')->toString();
+    $activeSubcategory = request()->string('subcategoria')->toString();
+
     $categories = Category::query()
         ->where('is_active', true)
-        ->with(['subCategories' => fn ($query) => $query->where('is_active', true)->orderBy('name')])
+        ->with([
+            'subCategories' => fn ($query) => $query->where('is_active', true)->orderBy('name'),
+            'news' => fn ($query) => $query->where('is_published', true),
+        ])
         ->orderBy('name')
         ->get()
         ->map(fn (Category $category) => [
             'id' => (string) $category->id,
             'name' => $category->name,
             'slug' => Str::slug($category->name),
+            'newsCount' => $category->news->count(),
             'subcategories' => $category->subCategories->map(fn ($subCategory) => [
                 'id' => (string) $subCategory->id,
                 'name' => $subCategory->name,
@@ -75,14 +83,69 @@ Route::get('/noticias', function () {
             ])->values(),
         ])->values();
 
+    $newsQuery = News::query()
+        ->with(['author:id,name', 'category:id,name', 'subCategory:id,name,category_id'])
+        ->where('is_published', true)
+        ->orderByDesc('published_at')
+        ->orderByDesc('id');
+
+    if ($activeCategory !== '') {
+        $newsQuery->whereHas('category', fn ($query) => $query->whereRaw('LOWER(name) = ?', [strtolower(str_replace('-', ' ', $activeCategory))]));
+    }
+
+    if ($activeSubcategory !== '') {
+        $newsQuery->whereHas('subCategory', fn ($query) => $query->whereRaw('LOWER(name) = ?', [strtolower(str_replace('-', ' ', $activeSubcategory))]));
+    }
+
+    $news = $newsQuery->paginate(8, ['*'], 'page', $page);
+
     return Inertia::render('noticias/NewsListing', [
         'categories' => $categories,
+        'articles' => $news->getCollection()->map($toPublicArticle)->values(),
+        'pagination' => [
+            'page' => $news->currentPage(),
+            'limit' => $news->perPage(),
+            'total' => $news->total(),
+        ],
+        'activeCategory' => $activeCategory,
+        'activeSubcategory' => $activeSubcategory,
     ]);
-})->name('news.index');
+})->whereNumber('page')->name('news.index');
 
-Route::get('/noticias/{slug}', function (string $slug) {
+Route::get('/noticias/{slug}', function (string $slug) use ($toPublicArticle) {
+    $article = News::query()
+        ->with(['author:id,name', 'category:id,name', 'subCategory:id,name,category_id'])
+        ->where('is_published', true)
+        ->where('slug', $slug)
+        ->firstOrFail();
+
+    $relatedArticles = News::query()
+        ->with(['author:id,name', 'category:id,name', 'subCategory:id,name,category_id'])
+        ->where('is_published', true)
+        ->whereKeyNot($article->id)
+        ->where('category_id', $article->category_id)
+        ->orderByDesc('published_at')
+        ->orderByDesc('id')
+        ->take(5)
+        ->get();
+
+    if ($relatedArticles->count() < 5) {
+        $fallbackIds = $relatedArticles->pluck('id')->push($article->id);
+        $fallback = News::query()
+            ->with(['author:id,name', 'category:id,name', 'subCategory:id,name,category_id'])
+            ->where('is_published', true)
+            ->whereNotIn('id', $fallbackIds)
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->take(5 - $relatedArticles->count())
+            ->get();
+
+        $relatedArticles = $relatedArticles->concat($fallback);
+    }
+
     return Inertia::render('noticias/NewDetail', [
-        'slug' => $slug,
+        'article' => $toPublicArticle($article),
+        'sidebarArticles' => $relatedArticles->map($toPublicArticle)->values(),
     ]);
 })->name('news.show');
 
