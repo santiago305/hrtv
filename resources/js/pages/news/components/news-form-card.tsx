@@ -1,3 +1,4 @@
+import { router } from '@inertiajs/react';
 import { FloatingInput } from '@/components/FloatingInput';
 import { FloatingTextarea } from '@/components/FloatingTextarea';
 import InputImages from '@/components/input_images/input-images';
@@ -11,7 +12,7 @@ type NewsFormCardProps = {
 };
 
 export function NewsFormCard({ categoryOptions }: NewsFormCardProps) {
-    const { form, media, setAudio, setCoverImage, setField, setImages, setVideos, submit } = useNewsForm();
+    const { form, media, isEditing, setAudio, setCoverImage, setField, setImages, setVideos, submit, cancelEdit } = useNewsForm();
     const { data, errors, processing } = form;
     const selectedCategory = categoryOptions.find((category) => String(category.id) === data.category_id) ?? null;
     const subCategoryOptions = selectedCategory?.sub_categories ?? [];
@@ -26,7 +27,7 @@ export function NewsFormCard({ categoryOptions }: NewsFormCardProps) {
                 </div>
 
                 <div>
-                    <h1 className="text-base font-semibold text-foreground">Crear noticia</h1>
+                    <h1 className="text-base font-semibold text-foreground">{isEditing ? 'Editar noticia' : 'Crear noticia'}</h1>
                 </div>
             </div>
 
@@ -192,10 +193,20 @@ export function NewsFormCard({ categoryOptions }: NewsFormCardProps) {
                     </label>
                 </div>
 
-                <SystemButton type="submit" size="sm" fullWidth loading={processing} disabled={categoryOptions.length === 0}>
-                    Crear noticia
-                </SystemButton>
+                <div className="flex gap-3">
+                    <SystemButton type="submit" size="sm" fullWidth loading={processing} disabled={categoryOptions.length === 0}>
+                        {isEditing ? 'Guardar cambios' : 'Crear noticia'}
+                    </SystemButton>
+
+                    {isEditing ? (
+                        <SystemButton type="button" variant="outline" size="sm" fullWidth onClick={cancelEdit}>
+                            Cancelar
+                        </SystemButton>
+                    ) : null}
+                </div>
             </form>
         </div>
     );
 }
+
+

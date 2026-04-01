@@ -5,6 +5,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\UserController;
 use App\Models\Category;
+use App\Models\News;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -56,7 +57,48 @@ Route::get('/contacto', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
+        $news = News::query()
+            ->with([
+                'author:id,name',
+                'category:id,name',
+                'subCategory:id,name,category_id',
+            ])
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        return Inertia::render('dashboard', [
+            'news' => $news->getCollection()->map(fn (News $item) => [
+                'id' => $item->id,
+                'title' => $item->title,
+                'slug' => $item->slug,
+                'excerpt' => $item->excerpt,
+                'is_breaking' => $item->is_breaking,
+                'is_featured' => $item->is_featured,
+                'is_published' => $item->is_published,
+                'views_count' => $item->views_count,
+                'likes_count' => $item->likes_count,
+                'published_at' => $item->published_at?->toDateTimeString(),
+                'created_at' => $item->created_at?->toDateTimeString(),
+                'author' => $item->author ? [
+                    'id' => $item->author->id,
+                    'name' => $item->author->name,
+                ] : null,
+                'category' => $item->category ? [
+                    'id' => $item->category->id,
+                    'name' => $item->category->name,
+                ] : null,
+                'sub_category' => $item->subCategory ? [
+                    'id' => $item->subCategory->id,
+                    'name' => $item->subCategory->name,
+                ] : null,
+            ])->values(),
+            'newsPagination' => [
+                'page' => $news->currentPage(),
+                'limit' => $news->perPage(),
+                'total' => $news->total(),
+            ],
+        ]);
     })->name('dashboard');
 
     Route::middleware('role:admin')->group(function () {
@@ -78,7 +120,10 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('dashboard/sub-categories/{subCategory}/toggle-status', [SubCategoryController::class, 'toggleStatus'])->name('sub-categories.toggle-status');
 
         Route::get('dashboard/news', [NewsController::class, 'index'])->name('dashboard.news.index');
+        Route::get('dashboard/news/{news}/edit', [NewsController::class, 'edit'])->name('dashboard.news.edit');
         Route::post('dashboard/news', [NewsController::class, 'store'])->name('dashboard.news.store');
+        Route::patch('dashboard/news/{news}', [NewsController::class, 'update'])->name('dashboard.news.update');
+        Route::patch('dashboard/news/{news}/toggle-status', [NewsController::class, 'toggleStatus'])->name('dashboard.news.toggle-status');
     });
 });
 

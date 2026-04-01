@@ -1,4 +1,5 @@
 import type { SharedData } from '@/types';
+import type { DataTablePaginationMeta } from '@/components/table/types';
 
 export type NewsSubCategoryOption = {
     id: number;
@@ -40,7 +41,29 @@ export type NewsTableItem = {
     } | null;
 };
 
+export type NewsEditorItem = {
+    id: number;
+    category_id: number;
+    sub_category_id: number | null;
+    title: string;
+    excerpt: string | null;
+    content: string;
+    cover_image_url: string | null;
+    audio_url: string | null;
+    images_urls: string[];
+    videos_urls: string[];
+    views_count: number;
+    likes_count: number;
+    published_at: string | null;
+    is_breaking: boolean;
+    is_featured: boolean;
+    is_published: boolean;
+    author: NewsAuthorOption | null;
+};
+
 export type NewsPageProps = SharedData & {
     categoryOptions: NewsCategoryOption[];
     news: NewsTableItem[];
+    newsPagination: DataTablePaginationMeta;
+    editingNews: NewsEditorItem | null;
 };

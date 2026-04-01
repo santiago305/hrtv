@@ -4,23 +4,25 @@ import { NewsFormContext } from './context';
 import { newsFormSchema } from './schema';
 import type { NewsFormData, NewsFormPreview, NewsFormProviderProps } from './types';
 
-const initialValues: NewsFormData = {
-    category_id: '',
-    sub_category_id: '',
-    title: '',
-    excerpt: '',
-    content: '',
-    cover_image: '',
-    audio_path: '',
-    images: [],
-    videos: [],
-    views_count: '0',
-    likes_count: '0',
-    published_at: '',
-    is_breaking: false,
-    is_featured: false,
-    is_published: false,
-};
+function createInitialValues(initialNews?: NewsFormProviderProps['initialNews']): NewsFormData {
+    return {
+        category_id: initialNews ? String(initialNews.category_id) : '',
+        sub_category_id: initialNews?.sub_category_id ? String(initialNews.sub_category_id) : '',
+        title: initialNews?.title ?? '',
+        excerpt: initialNews?.excerpt ?? '',
+        content: initialNews?.content ?? '',
+        cover_image: initialNews?.cover_image_url ?? '',
+        audio_path: initialNews?.audio_url ?? '',
+        images: initialNews?.images_urls ?? [],
+        videos: initialNews?.videos_urls ?? [],
+        views_count: String(initialNews?.views_count ?? 0),
+        likes_count: String(initialNews?.likes_count ?? 0),
+        published_at: initialNews?.published_at ?? '',
+        is_breaking: initialNews?.is_breaking ?? false,
+        is_featured: initialNews?.is_featured ?? false,
+        is_published: initialNews?.is_published ?? false,
+    };
+}
 
 function buildPreview(data: NewsFormData, coverImagePreview: string | null, audioPreview: string | null): NewsFormPreview {
     const coverImage = coverImagePreview ?? data.images[0] ?? null;
@@ -37,14 +39,15 @@ function buildPreview(data: NewsFormData, coverImagePreview: string | null, audi
     };
 }
 
-export function NewsFormProvider({ children }: NewsFormProviderProps) {
-    const form = useForm<NewsFormData>(initialValues);
+export function NewsFormProvider({ children, initialNews = null }: NewsFormProviderProps) {
+    const isEditing = initialNews !== null;
+    const form = useForm<NewsFormData>(createInitialValues(initialNews));
     const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
-    const [coverImagePreview, setCoverImagePreview] = useState<string | null>(null);
+    const [coverImagePreview, setCoverImagePreview] = useState<string | null>(initialNews?.cover_image_url ?? null);
     const [imageFiles, setImageFiles] = useState<File[]>([]);
     const [videoFiles, setVideoFiles] = useState<File[]>([]);
     const [audioFile, setAudioFile] = useState<File | null>(null);
-    const [audioPreview, setAudioPreview] = useState<string | null>(null);
+    const [audioPreview, setAudioPreview] = useState<string | null>(initialNews?.audio_url ?? null);
     const [resetKey, setResetKey] = useState(0);
 
     const preview = useMemo(() => buildPreview(form.data, coverImagePreview, audioPreview), [audioPreview, coverImagePreview, form.data]);
@@ -56,7 +59,16 @@ export function NewsFormProvider({ children }: NewsFormProviderProps) {
         }));
     };
 
+    const cancelEdit = () => {
+        router.get(route('dashboard.news.index'));
+    };
+
     const resetForm = () => {
+        if (isEditing) {
+            router.get(route('dashboard.news.edit', initialNews?.id));
+            return;
+        }
+
         form.reset();
         form.clearErrors();
         form.setData('views_count', '0');
@@ -75,18 +87,18 @@ export function NewsFormProvider({ children }: NewsFormProviderProps) {
         const previewUrl = previews[0] ?? null;
 
         setCoverImageFile(file);
-        setCoverImagePreview(previewUrl);
-        setField('cover_image', previewUrl ?? '');
+        setCoverImagePreview(previewUrl ?? (file ? null : initialNews?.cover_image_url ?? null));
+        setField('cover_image', previewUrl ?? initialNews?.cover_image_url ?? '');
     };
 
     const setImages = (files: File[], previews: string[]) => {
         setImageFiles(files);
-        setField('images', previews);
+        setField('images', previews.length > 0 ? previews : initialNews?.images_urls ?? []);
     };
 
     const setVideos = (files: File[], previews: string[]) => {
         setVideoFiles(files);
-        setField('videos', previews);
+        setField('videos', previews.length > 0 ? previews : initialNews?.videos_urls ?? []);
     };
 
     const setAudio = (files: File[], previews: string[]) => {
@@ -94,8 +106,8 @@ export function NewsFormProvider({ children }: NewsFormProviderProps) {
         const previewUrl = previews[0] ?? null;
 
         setAudioFile(file);
-        setAudioPreview(previewUrl);
-        setField('audio_path', file?.name ?? '');
+        setAudioPreview(previewUrl ?? (file ? null : initialNews?.audio_url ?? null));
+        setField('audio_path', file?.name ?? initialNews?.audio_url ?? '');
 
         if (!file) {
             form.clearErrors('audio_path');
@@ -165,6 +177,19 @@ export function NewsFormProvider({ children }: NewsFormProviderProps) {
             payload.append('audio_path', audioFile);
         }
 
+        if (isEditing && initialNews) {
+            payload.append('_method', 'patch');
+
+            router.post(route('dashboard.news.update', initialNews.id), payload, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    cancelEdit();
+                },
+            });
+
+            return;
+        }
+
         router.post(route('dashboard.news.store'), payload, {
             preserveScroll: true,
             onSuccess: () => {
@@ -189,11 +214,14 @@ export function NewsFormProvider({ children }: NewsFormProviderProps) {
                     audioPreview,
                     resetKey,
                 },
+                isEditing,
+                editingNewsId: initialNews?.id ?? null,
                 setField,
                 setCoverImage,
                 setImages,
                 setVideos,
                 setAudio,
+                cancelEdit,
                 resetForm,
                 submit,
             }}

@@ -26,7 +26,6 @@ function NewsContent() {
                 <div className="xl:col-span-8">
                     <PreviewNews />
                 </div>
-                {/* Form ocupa 4 columnas */}
                 <div className="space-y-6 xl:col-span-4 2xl:col-span-4">
                     <NewsFormCard categoryOptions={categoryOptions} />
                 </div>
@@ -36,10 +35,12 @@ function NewsContent() {
 }
 
 export default function NewsIndex() {
+    const { editingNews } = usePage<NewsPageProps>().props;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Noticias" />
-            <NewsFormProvider>
+            <NewsFormProvider initialNews={editingNews}>
                 <NewsContent />
             </NewsFormProvider>
         </AppLayout>

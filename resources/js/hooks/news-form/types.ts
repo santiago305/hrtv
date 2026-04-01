@@ -1,5 +1,6 @@
 import type { InertiaFormProps } from '@inertiajs/react';
 import type { ReactNode } from 'react';
+import type { NewsEditorItem } from '@/pages/news/types';
 import type { NewsFormData } from './schema';
 
 export type { NewsFormData } from './schema';
@@ -32,15 +33,19 @@ export type NewsFormContextValue = {
     form: InertiaFormProps<NewsFormData>;
     preview: NewsFormPreview;
     media: NewsMediaState;
+    isEditing: boolean;
+    editingNewsId: number | null;
     setField: <K extends keyof NewsFormData>(field: K, value: NewsFormData[K]) => void;
     setCoverImage: (files: File[], previews: string[]) => void;
     setImages: (files: File[], previews: string[]) => void;
     setVideos: (files: File[], previews: string[]) => void;
     setAudio: (files: File[], previews: string[]) => void;
+    cancelEdit: () => void;
     resetForm: () => void;
     submit: () => void;
 };
 
 export type NewsFormProviderProps = {
     children: ReactNode;
+    initialNews?: NewsEditorItem | null;
 };
