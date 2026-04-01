@@ -1,5 +1,10 @@
+import { createPlayer } from '@videojs/react';
+import { Video, videoFeatures, VideoSkin } from '@videojs/react/video';
+import '@videojs/react/video/skin.css';
 import clsx from 'clsx';
 import { useEffect, useMemo, useState } from 'react';
+
+const Player = createPlayer({ features: videoFeatures });
 
 type VideoNewsProps = {
     className?: string;
@@ -43,33 +48,36 @@ export default function VideoNews({ className, video = [] }: VideoNewsProps) {
 
     return (
         <div
-            className={clsx('relative mx-auto aspect-video w-full max-w-[700px] overflow-hidden rounded-lg shadow-lg', className)}
+            className={clsx(
+                'news-video-player relative mx-auto aspect-video w-full max-w-175 overflow-hidden',
+                className,
+            )}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            <video
-                key={videos[currentIndex]}
-                controls
-                autoPlay
-                muted
-                playsInline
-                className="h-full w-full object-cover"
-                onEnded={() => {
-                    if (videos.length > 1) {
-                        setCurrentIndex((prevIndex) => (prevIndex + 1) % videos.length);
-                    }
-                }}
-            >
-                <source src={videos[currentIndex]} type="video/mp4" />
-                Tu navegador no soporta la etiqueta de video.
-            </video>
+            <Player.Provider>
+                <VideoSkin>
+                    <Video
+                        key={videos[currentIndex]}
+                        src={videos[currentIndex]}
+                        playsInline
+                        autoPlay
+                        muted
+                        onEnded={() => {
+                            if (videos.length > 1) {
+                                setCurrentIndex((prevIndex) => (prevIndex + 1) % videos.length);
+                            }
+                        }}
+                    />
+                </VideoSkin>
+            </Player.Provider>
 
             {videos.length > 1 ? (
                 <>
                     <button
                         type="button"
                         onClick={prevSlide}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-all duration-200 hover:bg-black/80"
+                        className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-all duration-200 hover:bg-black/80"
                     >
                         {'<'}
                     </button>
@@ -77,12 +85,12 @@ export default function VideoNews({ className, video = [] }: VideoNewsProps) {
                     <button
                         type="button"
                         onClick={nextSlide}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-all duration-200 hover:bg-black/80"
+                        className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-all duration-200 hover:bg-black/80"
                     >
                         {'>'}
                     </button>
 
-                    <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2 rounded-full bg-black/45 px-3 py-1">
+                    <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-2 rounded-full bg-black/45 px-3 py-1">
                         {videos.map((item, index) => (
                             <button
                                 key={`${item}-${index}`}

@@ -191,6 +191,21 @@
     @apply mx-auto w-full px-4 sm:px-6 lg:px-6;
     max-width: 1356px;
   }
+  .video-js .vjs-tech {
+    border-radius: 0 !important;
+  }
+
+  .news-video-player,
+  .news-video-player .video-js,
+  .news-video-player .media-default-skin,
+  .news-video-player .media-video-layout,
+  .news-video-player .media-video-layout video,
+  .news-video-player .media-default-skin video,
+  .news-video-player .vjs-tech,
+  .news-video-player .vjs-poster,
+  .news-video-player .vjs-control-bar {
+    border-radius: 5px !important;
+  }
 
   .scroll-stable {
     overflow: auto;

@@ -1,4 +1,5 @@
 import { FloatingInput } from '@/components/FloatingInput';
+import { FloatingTextarea } from '@/components/FloatingTextarea';
 import InputImages from '@/components/input_images/input-images';
 import { FloatingSelect } from '@/components/FloatingSelect';
 import { SystemButton } from '@/components/SystemButton';
@@ -59,17 +60,19 @@ export function NewsFormCard({ categoryOptions }: NewsFormCardProps) {
                     disabled={disableForm}
                 />
 
-                <FloatingSelect
-                    label="Subcategoria"
-                    name="sub_category_id"
-                    value={data.sub_category_id}
-                    options={subCategoryOptions.map((subCategory) => ({ value: String(subCategory.id), label: subCategory.name }))}
-                    onChange={(value) => setField('sub_category_id', value)}
-                    error={errors.sub_category_id}
-                    placeholder=""
-                    searchable
-                    disabled={disableSubCategory}
-                />
+                {selectedCategory ? (
+                    <FloatingSelect
+                        label="Subcategoria"
+                        name="sub_category_id"
+                        value={data.sub_category_id}
+                        options={subCategoryOptions.map((subCategory) => ({ value: String(subCategory.id), label: subCategory.name }))}
+                        onChange={(value) => setField('sub_category_id', value)}
+                        error={errors.sub_category_id}
+                        placeholder=""
+                        searchable
+                        disabled={disableSubCategory}
+                    />
+                ) : null}
 
                 <FloatingInput
                     label="Titulo"
@@ -80,37 +83,27 @@ export function NewsFormCard({ categoryOptions }: NewsFormCardProps) {
                     disabled={disableForm}
                 />
 
-                <div className="space-y-1">
-                    <label htmlFor="excerpt" className="text-xs font-medium text-muted-foreground">
-                        Bajada
-                    </label>
-                    <textarea
-                        id="excerpt"
-                        name="excerpt"
-                        value={data.excerpt}
-                        onChange={(event) => setField('excerpt', event.target.value)}
-                        disabled={disableForm}
-                        rows={3}
-                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
-                    />
-                    {errors.excerpt ? <p className="text-xs text-red-600 dark:text-red-400">{errors.excerpt}</p> : null}
-                </div>
+                <FloatingTextarea
+                    label="Bajada"
+                    name="excerpt"
+                    value={data.excerpt}
+                    onChange={(event) => setField('excerpt', event.target.value)}
+                    error={errors.excerpt}
+                    disabled={disableForm}
+                    rows={3}
+                    className="min-h-24"
+                />
 
-                <div className="space-y-1">
-                    <label htmlFor="content" className="text-xs font-medium text-muted-foreground">
-                        Contenido
-                    </label>
-                    <textarea
-                        id="content"
-                        name="content"
-                        value={data.content}
-                        onChange={(event) => setField('content', event.target.value)}
-                        disabled={disableForm}
-                        rows={8}
-                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
-                    />
-                    {errors.content ? <p className="text-xs text-red-600 dark:text-red-400">{errors.content}</p> : null}
-                </div>
+                <FloatingTextarea
+                    label="Contenido"
+                    name="content"
+                    value={data.content}
+                    onChange={(event) => setField('content', event.target.value)}
+                    error={errors.content}
+                    disabled={disableForm}
+                    rows={8}
+                    className="min-h-44"
+                />
 
                 <InputImages
                     id="cover-image-upload"

@@ -7,7 +7,7 @@ export const newsFormSchema = z
         title: z.string().trim().min(1, 'El titulo es obligatorio.').max(255, 'El titulo no debe superar los 255 caracteres.'),
         excerpt: z.string().trim().optional().or(z.literal('')),
         content: z.string().trim().min(1, 'El contenido es obligatorio.'),
-        cover_image: z.string().trim().optional().or(z.literal('')),
+        cover_image: z.string().trim().min(1, 'La foto de portada es obligatoria.'),
         audio_path: z.string().trim().optional().or(z.literal('')),
         images: z.string().optional(),
         videos: z.string().optional(),
@@ -20,13 +20,28 @@ export const newsFormSchema = z
             .string()
             .trim()
             .regex(/^\d+$/, 'Los me gusta deben ser un numero entero positivo.'),
-        published_at: z.string().optional(),
+        published_at: z.string().trim().min(1, 'La fecha es obligatoria.'),
         is_breaking: z.boolean(),
         is_featured: z.boolean(),
         is_published: z.boolean(),
     })
     .superRefine((data, ctx) => {
+        const hasImages = data.images !== undefined && data.images.split(/\r\n|\r|\n/).some((item) => item.trim().length > 0);
         const hasVideos = data.videos !== undefined && data.videos.split(/\r\n|\r|\n/).some((item) => item.trim().length > 0);
+
+        if (!hasImages && !hasVideos) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['images'],
+                message: 'Debes subir al menos imagenes o videos.',
+            });
+
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['videos'],
+                message: 'Debes subir al menos imagenes o videos.',
+            });
+        }
 
         if (hasVideos && data.video_thumbnail.trim().length === 0) {
             ctx.addIssue({
