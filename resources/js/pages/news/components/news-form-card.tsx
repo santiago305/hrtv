@@ -1,7 +1,8 @@
-import { useNewsForm } from '@/hooks/news-form';
 import { FloatingInput } from '@/components/FloatingInput';
+import InputImages from '@/components/input_images/input-images';
 import { FloatingSelect } from '@/components/FloatingSelect';
 import { SystemButton } from '@/components/SystemButton';
+import { useNewsForm } from '@/hooks/news-form';
 import type { NewsCategoryOption } from '../types';
 
 type NewsFormCardProps = {
@@ -15,6 +16,8 @@ export function NewsFormCard({ categoryOptions }: NewsFormCardProps) {
     const subCategoryOptions = selectedCategory?.sub_categories ?? [];
     const disableSubCategory = processing || !selectedCategory;
     const disableForm = processing || categoryOptions.length === 0;
+    const imagePreviewUrls = data.images ? data.images.split(/\r\n|\r|\n/).map((item) => item.trim()).filter(Boolean) : [];
+    const videoPreviewUrls = data.videos ? data.videos.split(/\r\n|\r|\n/).map((item) => item.trim()).filter(Boolean) : [];
 
     return (
         <div className="rounded-sm border border-border bg-background p-5 sm:p-6">
@@ -25,12 +28,12 @@ export function NewsFormCard({ categoryOptions }: NewsFormCardProps) {
 
                 <div>
                     <h1 className="text-base font-semibold text-foreground">Crear noticia</h1>
-                    </div>
+                </div>
             </div>
 
             {categoryOptions.length === 0 ? (
                 <div className="mb-4 rounded-sm border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-xs text-amber-300">
-                    Primero necesitas categorías y subcategorías activas para registrar noticias.
+                    Primero necesitas categorias y subcategorias activas para registrar noticias.
                 </div>
             ) : null}
 
@@ -109,13 +112,15 @@ export function NewsFormCard({ categoryOptions }: NewsFormCardProps) {
                     {errors.content ? <p className="text-xs text-red-600 dark:text-red-400">{errors.content}</p> : null}
                 </div>
 
-                <FloatingInput
-                    label="Imagen principal"
-                    name="cover_image"
-                    value={data.cover_image}
-                    onChange={(event) => setField('cover_image', event.target.value)}
-                    error={errors.cover_image}
-                    disabled={disableForm}
+                <InputImages
+                    id="cover-image-upload"
+                    label="Subir imagen de portada"
+                    accept="image/*"
+                    error={errors.cover_image ?? null}
+                    previewUrls={data.cover_image ? [data.cover_image] : []}
+                    onFilesUpload={(_, previews) => {
+                        setField('cover_image', previews[0] ?? '');
+                    }}
                 />
 
                 <FloatingInput
@@ -127,51 +132,40 @@ export function NewsFormCard({ categoryOptions }: NewsFormCardProps) {
                     disabled={disableForm}
                 />
 
-                <div className="space-y-1">
-                    <label htmlFor="images" className="text-xs font-medium text-muted-foreground">
-                        Imagenes adicionales
-                    </label>
-                    <textarea
-                        id="images"
-                        name="images"
-                        value={data.images}
-                        onChange={(event) => setField('images', event.target.value)}
-                        disabled={disableForm}
-                        rows={4}
-                        placeholder="/storage/news/1/image1.jpg"
-                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
-                    />
-                    <p className="text-[11px] text-muted-foreground">Una ruta o URL por línea.</p>
-                    {errors.images ? <p className="text-xs text-red-600 dark:text-red-400">{errors.images}</p> : null}
-                </div>
-
-                <div className="space-y-1">
-                    <label htmlFor="videos" className="text-xs font-medium text-muted-foreground">
-                        Videos
-                    </label>
-                    <textarea
-                        id="videos"
-                        name="videos"
-                        value={data.videos}
-                        onChange={(event) => setField('videos', event.target.value)}
-                        disabled={disableForm}
-                        rows={4}
-                        placeholder="https://www.youtube.com/watch?v=xxxxxx"
-                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
-                    />
-                    <p className="text-[11px] text-muted-foreground">Si agregas videos, la miniatura será obligatoria.</p>
-                    {errors.videos ? <p className="text-xs text-red-600 dark:text-red-400">{errors.videos}</p> : null}
-                </div>
-
-                <FloatingInput
-                    label="Miniatura de video"
-                    name="video_thumbnail"
-                    value={data.video_thumbnail}
-                    onChange={(event) => setField('video_thumbnail', event.target.value)}
-                    error={errors.video_thumbnail}
-                    disabled={disableForm}
+                <InputImages
+                    id="news-images-upload"
+                    label="Subir imagenes adicionales"
+                    accept="image/*"
+                    multiple
+                    error={errors.images ?? null}
+                    previewUrls={imagePreviewUrls}
+                    onFilesUpload={(_, previews) => {
+                        setField('images', previews.join('\n'));
+                    }}
                 />
 
+                <InputImages
+                    id="news-videos-upload"
+                    label="Subir videos"
+                    accept="video/*"
+                    multiple
+                    error={errors.videos ?? null}
+                    previewUrls={videoPreviewUrls}
+                    onFilesUpload={(_, previews) => {
+                        setField('videos', previews.join('\n'));
+                    }}
+                />
+
+                <InputImages
+                    id="video-thumbnail-upload"
+                    label="Subir miniatura de video"
+                    accept="image/*"
+                    error={errors.video_thumbnail ?? null}
+                    previewUrls={data.video_thumbnail ? [data.video_thumbnail] : []}
+                    onFilesUpload={(_, previews) => {
+                        setField('video_thumbnail', previews[0] ?? '');
+                    }}
+                />
 
                 <FloatingInput
                     label="Fecha de publicacion"
