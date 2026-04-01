@@ -188,7 +188,7 @@
 
 @layer utilities {
   .container-main {
-    @apply mx-auto w-full px-4 sm:px-6 lg:px-10;
+    @apply mx-auto w-full px-4 sm:px-6 lg:px-6;
     max-width: 1356px;
   }
 

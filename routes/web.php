@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\NewsController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\UserController;
 use App\Models\Category;
@@ -75,6 +76,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('dashboard/sub-categories/{subCategory}', [SubCategoryController::class, 'show'])->name('sub-categories.show');
         Route::patch('dashboard/sub-categories/{subCategory}', [SubCategoryController::class, 'update'])->name('sub-categories.update');
         Route::patch('dashboard/sub-categories/{subCategory}/toggle-status', [SubCategoryController::class, 'toggleStatus'])->name('sub-categories.toggle-status');
+
+        Route::get('dashboard/news', [NewsController::class, 'index'])->name('dashboard.news.index');
+        Route::post('dashboard/news', [NewsController::class, 'store'])->name('dashboard.news.store');
     });
 });
 
