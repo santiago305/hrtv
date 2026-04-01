@@ -67,3 +67,4 @@ export type NewsPageProps = SharedData & {
     newsPagination: DataTablePaginationMeta;
     editingNews: NewsEditorItem | null;
 };
+

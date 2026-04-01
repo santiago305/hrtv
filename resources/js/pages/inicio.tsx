@@ -1,17 +1,30 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight, Play, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { AdPlaceholder } from '@/components/AdPlaceholder';
 import { NewsCard } from '@/components/NewsCard';
-import { mockArticles, mockLiveStreams } from '@/data/mockData';
+import { mockLiveStreams } from '@/data/mockData';
 import PublicSiteLayout from '@/layouts/public-site-layout';
+import type { NewsArticle } from '@/types/news';
 
-function HeroCarousel() {
+interface InicioProps {
+    logoUrl?: string;
+}
+
+type InicioPageProps = {
+    latestNews: NewsArticle[];
+};
+
+function HeroCarousel({ logoUrl, articles }: InicioProps & { articles: NewsArticle[] }) {
   const [current, setCurrent] = useState(0);
-  const heroArticles = mockArticles.slice(0, 3);
+  const heroArticles = articles.slice(0, 3);
 
   useEffect(() => {
+    if (heroArticles.length <= 1) {
+      return;
+    }
+
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % heroArticles.length);
     }, 6000);
@@ -19,7 +32,12 @@ function HeroCarousel() {
     return () => clearInterval(timer);
   }, [heroArticles.length]);
 
+  if (heroArticles.length === 0) {
+    return null;
+  }
+
   const article = heroArticles[current];
+  const currentLogoUrl = logoUrl ?? '/storage/logo.png';
 
   return (
     <section className="relative h-[60vh] min-h-100 max-h-150 overflow-hidden bg-surface-alt">
@@ -38,8 +56,8 @@ function HeroCarousel() {
       <div className="container-main relative flex h-full items-center">
         <div className="max-w-xl space-y-4">
           <div className="flex items-center gap-1.5">
-            <div className="flex h-10 w-10 items-center justify-center bg-primary">
-              <span className="text-sm font-bold text-primary-foreground">HR</span>
+            <div className="flex h-10 w-10 items-center justify-center">
+              <img src={currentLogoUrl} alt="HRTV" className="h-10 w-auto object-contain" />
             </div>
             <div>
               <span className="text-lg font-bold text-primary-foreground">HRTV</span>
@@ -79,7 +97,7 @@ function HeroCarousel() {
           </motion.p>
 
           <Link
-            href={route('news.index')}
+            href={route('news.show', { slug: article.slug })}
             className="inline-flex items-center gap-2 border border-primary-foreground/20 bg-primary-foreground/10 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground backdrop-blur-sm transition-colors hover:bg-primary hover:text-primary-foreground"
           >
             Leer mas
@@ -125,7 +143,7 @@ function HeroCarousel() {
   );
 }
 
-function LatestNewsSection() {
+function LatestNewsSection({ articles }: { articles: NewsArticle[] }) {
   return (
     <section className="container-main py-12">
       <div className="mb-6 flex items-center justify-between">
@@ -135,7 +153,7 @@ function LatestNewsSection() {
         </Link>
       </div>
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {mockArticles.slice(0, 3).map((article) => (
+        {articles.map((article) => (
           <NewsCard key={article.id} article={article} />
         ))}
       </div>
@@ -221,14 +239,14 @@ function LiveStreamSection() {
   );
 }
 
-function MoreNewsSection() {
+function MoreNewsSection({ articles }: { articles: NewsArticle[] }) {
   return (
     <section className="container-main py-12">
       <div className="mb-6">
         <h2 className="text-lg font-bold text-foreground">Mas Noticias</h2>
       </div>
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {mockArticles.slice(3).map((article) => (
+        {articles.map((article) => (
           <NewsCard key={article.id} article={article} />
         ))}
       </div>
@@ -237,17 +255,21 @@ function MoreNewsSection() {
 }
 
 export default function Inicio() {
+  const { latestNews = [] } = usePage<InicioPageProps>().props;
+  const firstBlock = latestNews.slice(0, 3);
+  const secondBlock = latestNews.slice(3, 6);
+
   return (
     <PublicSiteLayout title="Inicio">
-      <HeroCarousel />
+      <HeroCarousel articles={latestNews} />
       <AdPlaceholder size="leaderboard" className="container-main mt-6" />
-      <LatestNewsSection />
+      <LatestNewsSection articles={firstBlock} />
       <div className="container-main pb-6">
         <AdPlaceholder size="banner" />
       </div>
       <LiveStreamSection />
       <AdPlaceholder size="leaderboard" className="container-main mt-6" />
-      <MoreNewsSection />
+      <MoreNewsSection articles={secondBlock} />
       <div className="container-main pb-12">
         <AdPlaceholder size="banner" />
       </div>

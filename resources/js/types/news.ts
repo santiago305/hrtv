@@ -20,10 +20,10 @@ export interface NewsArticle {
   body: string;
   image: string;
   images?: string[];
-  videoUrl?: string;
-  audioUrl?: string;
+  videoUrl?: string | null;
+  audioUrl?: string | null;
   category: NewsCategory;
-  subcategory?: NewsSubCategory;
+  subcategory?: NewsSubCategory | null;
   author: string;
   publishedAt: string;
   views: number;

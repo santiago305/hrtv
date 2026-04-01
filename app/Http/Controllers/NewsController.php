@@ -179,7 +179,7 @@ class NewsController extends Controller
         ]);
 
         return redirect()
-            ->route('dashboard.news.index')
+            ->route('dashboard')
             ->with('success', 'Noticia actualizada correctamente.');
     }
 
@@ -247,6 +247,7 @@ class NewsController extends Controller
     {
         return [
             'id' => $news->id,
+            'slug' => $news->slug,
             'category_id' => $news->category_id,
             'sub_category_id' => $news->sub_category_id,
             'title' => $news->title,
@@ -254,8 +255,8 @@ class NewsController extends Controller
             'content' => $news->content,
             'cover_image_url' => $this->mediaUrl($news->cover_image),
             'audio_url' => $this->mediaUrl($news->audio_path),
-            'images_urls' => collect($news->images ?? [])->map(fn (string $path) => $this->mediaUrl($path))->filter()->values(),
-            'videos_urls' => collect($news->videos ?? [])->map(fn (string $path) => $this->mediaUrl($path))->filter()->values(),
+            'images_urls' => collect($news->images ?? [])->map(fn (string $path) => $this->mediaUrl($path))->filter()->values()->all(),
+            'videos_urls' => collect($news->videos ?? [])->map(fn (string $path) => $this->mediaUrl($path))->filter()->values()->all(),
             'views_count' => $news->views_count,
             'likes_count' => $news->likes_count,
             'published_at' => $news->published_at?->format('Y-m-d\TH:i'),
@@ -278,4 +279,3 @@ class NewsController extends Controller
         return Storage::disk(config('media.disk', 'public'))->url($path);
     }
 }
-

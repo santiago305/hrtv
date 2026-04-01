@@ -60,12 +60,12 @@ export function NewsFormProvider({ children, initialNews = null }: NewsFormProvi
     };
 
     const cancelEdit = () => {
-        router.get(route('dashboard.news.index'));
+        router.get(route('dashboard'));
     };
 
     const resetForm = () => {
         if (isEditing) {
-            router.get(route('dashboard.news.edit', initialNews?.id));
+            router.get(route('dashboard.news.edit', initialNews?.slug));
             return;
         }
 
@@ -180,7 +180,7 @@ export function NewsFormProvider({ children, initialNews = null }: NewsFormProvi
         if (isEditing && initialNews) {
             payload.append('_method', 'patch');
 
-            router.post(route('dashboard.news.update', initialNews.id), payload, {
+            router.post(route('dashboard.news.update', initialNews.slug), payload, {
                 preserveScroll: true,
                 onSuccess: () => {
                     cancelEdit();

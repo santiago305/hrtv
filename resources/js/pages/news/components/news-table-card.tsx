@@ -29,7 +29,7 @@ function buildActions(item: NewsTableItem): ActionItem[] {
             className: item.is_published ? 'hover:bg-red-500/10' : 'hover:bg-primary/5',
             onClick: () =>
                 router.patch(
-                    route('dashboard.news.toggle-status', item.id),
+                    route('dashboard.news.toggle-status', item.slug),
                     {},
                     {
                         preserveScroll: true,
@@ -42,7 +42,7 @@ function buildActions(item: NewsTableItem): ActionItem[] {
             label: 'Editar',
             icon: <Pencil className="h-4 w-4" />,
             onClick: () =>
-                router.get(route('dashboard.news.edit', item.id), {}, { preserveScroll: true }),
+                router.get(route('dashboard.news.edit', item.slug), {}, { preserveScroll: true }),
         },
     ];
 }
@@ -83,6 +83,23 @@ export function NewsTableCard({ news, pagination, onPageChange }: NewsTableCardP
             searchable: false,
             sortAccessor: (item) => item.views_count,
             cell: (item) => <span className="text-muted-foreground">{formatCompactNumber(item.views_count)}</span>,
+        },
+        {
+            id: 'status',
+            header: 'Estado',
+            searchable: false,
+            sortAccessor: (item) => Number(item.is_published),
+            cell: (item) => (
+                <span
+                    className={
+                        item.is_published
+                            ? 'inline-flex rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
+                            : 'inline-flex rounded-full bg-slate-200 px-3 py-1 text-[11px] font-medium text-slate-700 dark:bg-slate-500/15 dark:text-slate-300'
+                    }
+                >
+                    {item.is_published ? 'Activa' : 'Desactivada'}
+                </span>
+            ),
         },
         {
             id: 'actions',

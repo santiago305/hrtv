@@ -7,11 +7,54 @@ use App\Http\Controllers\UserController;
 use App\Models\Category;
 use App\Models\News;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('inicio');
+    $latestNews = News::query()
+        ->with(['author:id,name', 'category:id,name', 'subCategory:id,name,category_id'])
+        ->where('is_published', true)
+        ->orderByDesc('published_at')
+        ->orderByDesc('id')
+        ->take(6)
+        ->get();
+
+    $toPublicArticle = static function (News $item): array {
+        $coverUrl = Storage::disk(config('media.disk', 'public'))->url($item->cover_image);
+
+        return [
+            'id' => (string) $item->id,
+            'title' => $item->title,
+            'slug' => $item->slug,
+            'summary' => $item->excerpt ?? '',
+            'body' => $item->content,
+            'image' => $coverUrl,
+            'images' => collect($item->images ?? [])->map(fn (string $path) => Storage::disk(config('media.disk', 'public'))->url($path))->values()->all(),
+            'videoUrl' => collect($item->videos ?? [])->map(fn (string $path) => Storage::disk(config('media.disk', 'public'))->url($path))->first(),
+            'audioUrl' => $item->audio_path ? Storage::disk(config('media.disk', 'public'))->url($item->audio_path) : null,
+            'category' => [
+                'id' => (string) $item->category_id,
+                'name' => $item->category?->name ?? 'Sin categoria',
+                'slug' => Str::slug($item->category?->name ?? 'sin-categoria'),
+            ],
+            'subcategory' => $item->subCategory ? [
+                'id' => (string) $item->subCategory->id,
+                'name' => $item->subCategory->name,
+                'slug' => Str::slug($item->subCategory->name),
+                'categoryId' => (string) $item->category_id,
+            ] : null,
+            'author' => $item->author?->name ?? 'Redaccion',
+            'publishedAt' => ($item->published_at ?? $item->created_at)?->toIso8601String(),
+            'views' => $item->views_count,
+            'likes' => $item->likes_count,
+            'isBreaking' => $item->is_breaking,
+        ];
+    };
+
+    return Inertia::render('inicio', [
+        'latestNews' => $latestNews->map($toPublicArticle)->values(),
+    ]);
 })->name('home');
 
 Route::get('/noticias', function () {
@@ -120,10 +163,10 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('dashboard/sub-categories/{subCategory}/toggle-status', [SubCategoryController::class, 'toggleStatus'])->name('sub-categories.toggle-status');
 
         Route::get('dashboard/news', [NewsController::class, 'index'])->name('dashboard.news.index');
-        Route::get('dashboard/news/{news}/edit', [NewsController::class, 'edit'])->name('dashboard.news.edit');
+        Route::get('dashboard/news/{news:slug}/edit', [NewsController::class, 'edit'])->name('dashboard.news.edit');
         Route::post('dashboard/news', [NewsController::class, 'store'])->name('dashboard.news.store');
-        Route::patch('dashboard/news/{news}', [NewsController::class, 'update'])->name('dashboard.news.update');
-        Route::patch('dashboard/news/{news}/toggle-status', [NewsController::class, 'toggleStatus'])->name('dashboard.news.toggle-status');
+        Route::patch('dashboard/news/{news:slug}', [NewsController::class, 'update'])->name('dashboard.news.update');
+        Route::patch('dashboard/news/{news:slug}/toggle-status', [NewsController::class, 'toggleStatus'])->name('dashboard.news.toggle-status');
     });
 });
 
