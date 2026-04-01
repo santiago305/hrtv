@@ -1,8 +1,9 @@
 import { useNewsForm } from '@/hooks/news-form';
-import CarouselBlog from './CarouselBlog';
-import DescriptionBlog from './DescriptionBlog';
-import TitleBlog from './TitleBlog';
-import VideoBlog from './VideoBlog';
+import CarouselNews from './CarouselNews';
+import DescriptionNews from './DescriptionNews';
+import ExcerptNews from './ExcerptNews';
+import TitleNews from './TitleNews';
+import VideoNews from './VideoNews';
 
 export default function PreviewNews() {
     const { preview } = useNewsForm();
@@ -10,19 +11,20 @@ export default function PreviewNews() {
     return (
         <div className="min-w-75 h-full flex-1 select-none">
             <div className="relative flex h-full flex-col overflow-y-auto rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                <TitleBlog title={preview.title} />
+                <TitleNews title={preview.title} />
 
                 {preview.imagePreviews.length > 0 ? (
                     <div className="p-4">
-                        <CarouselBlog images={preview.imagePreviews} />
+                        <CarouselNews images={preview.imagePreviews} />
                     </div>
                 ) : null}
 
-                <DescriptionBlog description={preview.excerpt} />
+                <ExcerptNews excerpt={preview.excerpt} />
+                <DescriptionNews description={preview.content} />
 
                 {preview.videoPreviews.length > 0 ? (
                     <div className="p-4">
-                        <VideoBlog video={preview.videoPreviews} />
+                        <VideoNews video={preview.videoPreviews} />
                     </div>
                 ) : null}
             </div>

@@ -1,12 +1,12 @@
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 
-type CarouselBlogProps = {
+type CarouselNewsProps = {
     images?: string[];
     className?: string;
 };
 
-export default function CarouselBlog({ className, images = [] }: CarouselBlogProps) {
+export default function CarouselNews({ className, images = [] }: CarouselNewsProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {

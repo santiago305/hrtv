@@ -1,11 +1,11 @@
 import clsx from 'clsx';
 
-type VideoBlogProps = {
+type VideoNewsProps = {
     className?: string;
     video?: string[];
 };
 
-export default function VideoBlog({ className, video = [] }: VideoBlogProps) {
+export default function VideoNews({ className, video = [] }: VideoNewsProps) {
     if (video.length === 0) return null;
 
     return (
