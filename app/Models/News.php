@@ -25,7 +25,6 @@ class News extends Model
         'audio_path',
         'images',
         'videos',
-        'video_thumbnail',
         'is_breaking',
         'is_featured',
         'is_published',

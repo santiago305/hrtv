@@ -11,17 +11,16 @@ return new class extends Migration
         Schema::create('news', function (Blueprint $table) {
             $table->id();
             $table->foreignId('category_id')->constrained('categories')->restrictOnDelete();
-            $table->foreignId('sub_category_id')->constrained('sub_categories')->restrictOnDelete();
+            $table->foreignId('sub_category_id')->nullable()->constrained('sub_categories')->nullOnDelete();
             $table->foreignId('user_id')->constrained('users')->restrictOnDelete();
             $table->string('title', 255);
             $table->string('slug', 255)->unique();
             $table->text('excerpt')->nullable();
             $table->longText('content');
-            $table->string('cover_image', 255)->nullable();
+            $table->string('cover_image', 255);
             $table->string('audio_path', 255)->nullable();
             $table->json('images')->nullable();
             $table->json('videos')->nullable();
-            $table->string('video_thumbnail', 255)->nullable();
             $table->boolean('is_breaking')->default(false);
             $table->boolean('is_featured')->default(false);
             $table->boolean('is_published')->default(false);

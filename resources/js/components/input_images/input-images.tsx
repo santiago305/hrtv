@@ -1,4 +1,4 @@
-import { ImageIcon, UploadCloud, Video, X } from 'lucide-react';
+import { FileAudio2, ImageIcon, UploadCloud, Video, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import InputError from '../input-error';
 import { Label } from '../ui/label';
@@ -23,25 +23,26 @@ function isFileAccepted(file: File, acceptedTypes: string[]) {
     });
 }
 
-function detectPreviewKind(file?: File, url?: string, accept?: string): 'image' | 'video' {
+function detectPreviewKind(file?: File, url?: string, accept?: string): 'image' | 'video' | 'audio' {
     if (file) {
         if (file.type.startsWith('video/')) return 'video';
+        if (file.type.startsWith('audio/')) return 'audio';
         return 'image';
     }
 
     if (url) {
         const cleanUrl = url.toLowerCase();
 
-        if (
-            cleanUrl.endsWith('.mp4') ||
-            cleanUrl.endsWith('.webm') ||
-            cleanUrl.endsWith('.ogg') ||
-            cleanUrl.endsWith('.mov')
-        ) {
+        if (cleanUrl.endsWith('.mp4') || cleanUrl.endsWith('.webm') || cleanUrl.endsWith('.ogg') || cleanUrl.endsWith('.mov')) {
             return 'video';
+        }
+
+        if (cleanUrl.endsWith('.mp3') || cleanUrl.endsWith('.wav') || cleanUrl.endsWith('.m4a') || cleanUrl.endsWith('.aac')) {
+            return 'audio';
         }
     }
 
+    if (accept?.includes('audio')) return 'audio';
     if (accept?.includes('video')) return 'video';
 
     return 'image';
@@ -54,10 +55,11 @@ export default function InputImages({
     multiple = false,
     accept = 'image/*',
     label = 'Subir archivo',
-    helperText = 'Haz clic para seleccionar o arrastra tus archivos aquí.',
+    helperText = 'Haz clic para seleccionar o arrastra tus archivos aqui.',
     previewUrls: externalPreviewUrls = [],
     disabled = false,
     maxPreviewHeight = 'h-28',
+    resetKey,
 }: InputImagesProps) {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const previousUrlsRef = useRef<string[]>([]);
@@ -66,18 +68,28 @@ export default function InputImages({
     const [internalPreviewUrls, setInternalPreviewUrls] = useState<string[]>([]);
     const [isDragging, setIsDragging] = useState(false);
 
-    useEffect(() => {
-        return () => {
-            previousUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
-        };
-    }, []);
-
     const acceptedTypes = useMemo(() => getAcceptedTypes(accept), [accept]);
 
     const clearObjectUrls = () => {
         previousUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
         previousUrlsRef.current = [];
     };
+
+    useEffect(() => {
+        return () => {
+            previousUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+        };
+    }, []);
+
+    useEffect(() => {
+        clearObjectUrls();
+        setFiles([]);
+        setInternalPreviewUrls([]);
+
+        if (inputRef.current) {
+            inputRef.current.value = '';
+        }
+    }, [resetKey]);
 
     const syncFiles = (selectedFiles: File[]) => {
         if (selectedFiles.length === 0) {
@@ -199,9 +211,7 @@ export default function InputImages({
                             {multiple ? 'Selecciona uno o varios archivos' : 'Selecciona un archivo'}
                         </p>
 
-                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                            {helperText}
-                        </p>
+                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{helperText}</p>
 
                         <p className="mt-2 text-[11px] text-muted-foreground">
                             Permitido: <span className="font-medium">{accept}</span>
@@ -229,6 +239,10 @@ export default function InputImages({
                                         loop
                                         playsInline
                                     />
+                                ) : item.kind === 'audio' ? (
+                                    <div className={`flex w-full items-center justify-center bg-muted/60 px-4 ${maxPreviewHeight}`}>
+                                        <audio src={item.url} controls className="w-full max-w-full" />
+                                    </div>
                                 ) : (
                                     <img
                                         src={item.url}
@@ -250,15 +264,23 @@ export default function InputImages({
 
                             <div className="flex items-center gap-2 border-t border-border px-3 py-2">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                                    {item.kind === 'video' ? <Video className="h-4 w-4" /> : <ImageIcon className="h-4 w-4" />}
+                                    {item.kind === 'video' ? (
+                                        <Video className="h-4 w-4" />
+                                    ) : item.kind === 'audio' ? (
+                                        <FileAudio2 className="h-4 w-4" />
+                                    ) : (
+                                        <ImageIcon className="h-4 w-4" />
+                                    )}
                                 </div>
 
                                 <div className="min-w-0 flex-1">
-                                    <p className="truncate text-xs font-medium text-foreground">
-                                        {item.file?.name ?? `Archivo ${index + 1}`}
-                                    </p>
+                                    <p className="truncate text-xs font-medium text-foreground">{item.file?.name ?? `Archivo ${index + 1}`}</p>
                                     <p className="text-[11px] text-muted-foreground">
-                                        {item.kind === 'video' ? 'Vista previa de video' : 'Vista previa de imagen'}
+                                        {item.kind === 'video'
+                                            ? 'Vista previa de video'
+                                            : item.kind === 'audio'
+                                              ? 'Vista previa de audio'
+                                              : 'Vista previa de imagen'}
                                     </p>
                                 </div>
                             </div>

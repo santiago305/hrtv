@@ -6,4 +6,11 @@ return [
     'images' => [
         'directory' => env('MEDIA_IMAGE_DIRECTORY', 'uploads/images'),
     ],
+
+    'news' => [
+        'covers_directory' => env('MEDIA_NEWS_COVERS_DIRECTORY', 'uploads/news/covers'),
+        'images_directory' => env('MEDIA_NEWS_IMAGES_DIRECTORY', 'uploads/news/images'),
+        'videos_directory' => env('MEDIA_NEWS_VIDEOS_DIRECTORY', 'uploads/news/videos'),
+        'audio_directory' => env('MEDIA_NEWS_AUDIO_DIRECTORY', 'uploads/news/audio'),
+    ],
 ];

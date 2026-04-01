@@ -11,14 +11,12 @@ type NewsFormCardProps = {
 };
 
 export function NewsFormCard({ categoryOptions }: NewsFormCardProps) {
-    const { form, setField, submit } = useNewsForm();
+    const { form, media, setAudio, setCoverImage, setField, setImages, setVideos, submit } = useNewsForm();
     const { data, errors, processing } = form;
     const selectedCategory = categoryOptions.find((category) => String(category.id) === data.category_id) ?? null;
     const subCategoryOptions = selectedCategory?.sub_categories ?? [];
     const disableSubCategory = processing || !selectedCategory;
     const disableForm = processing || categoryOptions.length === 0;
-    const imagePreviewUrls = data.images ? data.images.split(/\r\n|\r|\n/).map((item) => item.trim()).filter(Boolean) : [];
-    const videoPreviewUrls = data.videos ? data.videos.split(/\r\n|\r|\n/).map((item) => item.trim()).filter(Boolean) : [];
 
     return (
         <div className="rounded-sm border border-border bg-background p-5 sm:p-6">
@@ -110,19 +108,21 @@ export function NewsFormCard({ categoryOptions }: NewsFormCardProps) {
                     label="Subir imagen de portada"
                     accept="image/*"
                     error={errors.cover_image ?? null}
-                    previewUrls={data.cover_image ? [data.cover_image] : []}
-                    onFilesUpload={(_, previews) => {
-                        setField('cover_image', previews[0] ?? '');
-                    }}
+                    previewUrls={media.coverImagePreview ? [media.coverImagePreview] : []}
+                    onFilesUpload={setCoverImage}
+                    resetKey={media.resetKey}
                 />
 
-                <FloatingInput
-                    label="Audio opcional"
-                    name="audio_path"
-                    value={data.audio_path}
-                    onChange={(event) => setField('audio_path', event.target.value)}
+                <InputImages
+                    id="news-audio-upload"
+                    label="Subir audio opcional"
+                    accept="audio/*"
                     error={errors.audio_path}
-                    disabled={disableForm}
+                    previewUrls={media.audioPreview ? [media.audioPreview] : []}
+                    onFilesUpload={setAudio}
+                    resetKey={media.resetKey}
+                    helperText="Acepta archivos de audio como MP3, WAV, OGG o M4A."
+                    maxPreviewHeight="h-20"
                 />
 
                 <InputImages
@@ -131,10 +131,9 @@ export function NewsFormCard({ categoryOptions }: NewsFormCardProps) {
                     accept="image/*"
                     multiple
                     error={errors.images ?? null}
-                    previewUrls={imagePreviewUrls}
-                    onFilesUpload={(_, previews) => {
-                        setField('images', previews.join('\n'));
-                    }}
+                    previewUrls={media.imagePreviews}
+                    onFilesUpload={setImages}
+                    resetKey={media.resetKey}
                 />
 
                 <InputImages
@@ -143,21 +142,9 @@ export function NewsFormCard({ categoryOptions }: NewsFormCardProps) {
                     accept="video/*"
                     multiple
                     error={errors.videos ?? null}
-                    previewUrls={videoPreviewUrls}
-                    onFilesUpload={(_, previews) => {
-                        setField('videos', previews.join('\n'));
-                    }}
-                />
-
-                <InputImages
-                    id="video-thumbnail-upload"
-                    label="Subir miniatura de video"
-                    accept="image/*"
-                    error={errors.video_thumbnail ?? null}
-                    previewUrls={data.video_thumbnail ? [data.video_thumbnail] : []}
-                    onFilesUpload={(_, previews) => {
-                        setField('video_thumbnail', previews[0] ?? '');
-                    }}
+                    previewUrls={media.videoPreviews}
+                    onFilesUpload={setVideos}
+                    resetKey={media.resetKey}
                 />
 
                 <FloatingInput

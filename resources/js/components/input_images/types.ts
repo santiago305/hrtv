@@ -1,7 +1,9 @@
+import type { ReactNode } from 'react';
+
 export type PreviewItem = {
     url: string;
     file?: File;
-    kind: 'image' | 'video';
+    kind: 'image' | 'video' | 'audio';
 };
 
 export type InputImagesProps = {
@@ -15,4 +17,6 @@ export type InputImagesProps = {
     helperText?: string;
     disabled?: boolean;
     maxPreviewHeight?: string;
+    resetKey?: string | number;
+    children?: ReactNode;
 };

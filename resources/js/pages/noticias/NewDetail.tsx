@@ -4,6 +4,7 @@ import { AdPlaceholder } from '@/components/AdPlaceholder';
 import { NewsCard } from '@/components/NewsCard';
 import { mockArticles } from '@/data/mockData';
 import PublicSiteLayout from '@/layouts/public-site-layout';
+import TitleNews from '../news/components/TitleNews';
 
 interface NewsDetailPageProps {
   slug: string;
@@ -52,9 +53,7 @@ export default function NewsDetailPage({ slug }: NewsDetailPageProps) {
               )}
             </div>
 
-            <h1 className="text-2xl font-bold leading-tight text-foreground sm:text-3xl">
-              {article.title}
-            </h1>
+            <TitleNews title={article.title} />
 
             <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
               <span>Por {article.author}</span>

@@ -10,7 +10,7 @@ export default function PreviewNews() {
 
     return (
         <div className="min-w-75 h-full flex-1 select-none">
-            <div className="relative flex h-full flex-col overflow-y-auto rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
+            <div className="relative flex h-full flex-col overflow-y-auto rounded-xl border border-sidebar-border/70 dark:border-sidebar-border  p-3">
                 <TitleNews title={preview.title} />
 
                 {preview.imagePreviews.length > 0 ? (

@@ -4,8 +4,8 @@ type TitleNewsProps = {
 
 export default function TitleNews({ title }: TitleNewsProps) {
     return (
-        <h3 className="m-4 text-3xl font-bold text-red-700 md:text-5xl lg:text-7xl">
-            <strong>{title}</strong>
-        </h3>
+        <h1 className="text-2xl font-bold leading-tight text-foreground sm:text-3xl">
+            {title}
+        </h1>
     );
 }
