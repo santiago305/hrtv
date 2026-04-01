@@ -22,7 +22,7 @@ const initialValues: NewsFormData = {
     is_published: false,
 };
 
-function buildPreview(data: NewsFormData, coverImagePreview: string | null): NewsFormPreview {
+function buildPreview(data: NewsFormData, coverImagePreview: string | null, audioPreview: string | null): NewsFormPreview {
     const coverImage = coverImagePreview ?? data.images[0] ?? null;
     const imagePreviews = coverImage ? [coverImage, ...data.images.filter((image) => image !== coverImage)] : data.images;
 
@@ -33,6 +33,7 @@ function buildPreview(data: NewsFormData, coverImagePreview: string | null): New
         coverImage,
         imagePreviews,
         videoPreviews: data.videos,
+        audioPreview,
     };
 }
 
@@ -46,7 +47,7 @@ export function NewsFormProvider({ children }: NewsFormProviderProps) {
     const [audioPreview, setAudioPreview] = useState<string | null>(null);
     const [resetKey, setResetKey] = useState(0);
 
-    const preview = useMemo(() => buildPreview(form.data, coverImagePreview), [coverImagePreview, form.data]);
+    const preview = useMemo(() => buildPreview(form.data, coverImagePreview, audioPreview), [audioPreview, coverImagePreview, form.data]);
 
     const setField = <K extends keyof NewsFormData>(field: K, value: NewsFormData[K]) => {
         form.setData((currentData) => ({

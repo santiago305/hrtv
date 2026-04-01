@@ -1,10 +1,16 @@
 import { useState } from 'react';
-import { Eye, Heart, Pause, Play, Share2 } from 'lucide-react';
+import { Heart, Share2 } from 'lucide-react';
 import { AdPlaceholder } from '@/components/AdPlaceholder';
 import { NewsCard } from '@/components/NewsCard';
 import { mockArticles } from '@/data/mockData';
 import PublicSiteLayout from '@/layouts/public-site-layout';
+import AudioNews from '../news/components/AudioNews';
+import CarouselNews from '../news/components/CarouselNews';
+import DescriptionNews from '../news/components/DescriptionNews';
+import ExcerptNews from '../news/components/ExcerptNews';
+import NewsMeta from '../news/components/NewsMeta';
 import TitleNews from '../news/components/TitleNews';
+import VideoNews from '../news/components/VideoNews';
 
 interface NewsDetailPageProps {
   slug: string;
@@ -12,7 +18,6 @@ interface NewsDetailPageProps {
 
 export default function NewsDetailPage({ slug }: NewsDetailPageProps) {
   const [liked, setLiked] = useState(false);
-  const [audioPlaying, setAudioPlaying] = useState(false);
 
   const article = mockArticles.find((a) => a.slug === slug) || mockArticles[0];
   const relatedArticles = mockArticles
@@ -20,17 +25,8 @@ export default function NewsDetailPage({ slug }: NewsDetailPageProps) {
     .slice(0, 5);
   const moreRelated = mockArticles.filter((a) => a.id !== article.id).slice(0, 5);
   const sidebarArticles = relatedArticles.length > 0 ? relatedArticles : moreRelated;
-
-  const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  const articleImages = article.images && article.images.length > 0 ? article.images : [article.image];
+  const articleVideos = article.videoUrl ? [article.videoUrl] : [];
 
   const formatCount = (n: number) => {
     if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
@@ -54,58 +50,19 @@ export default function NewsDetailPage({ slug }: NewsDetailPageProps) {
             </div>
 
             <TitleNews title={article.title} />
+            <NewsMeta authorName={article.author} publishedAt={article.publishedAt} viewsCount={article.views} />
 
-            <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-              <span>Por {article.author}</span>
-              <span>{formatDate(article.publishedAt)}</span>
-              <span className="flex items-center gap-1">
-                <Eye size={12} /> {formatCount(article.views)} vistas
-              </span>
-            </div>
+            <CarouselNews images={articleImages} />
 
-            <div className="mt-5 overflow-hidden">
-              <img
-                src={article.image}
-                alt={article.title}
-                className="aspect-video w-full object-cover"
-              />
-            </div>
-
-            <p className="mt-5 border-l-2 border-primary pl-4 text-base leading-relaxed text-foreground/70">
-              {article.summary}
-            </p>
+            <ExcerptNews excerpt={article.summary} />
 
             <div className="mt-6">
-              <div className="float-none mb-4 sm:float-left sm:mb-2 sm:mr-5 sm:w-64">
-                <div className="flex items-center gap-3 border border-border bg-surface p-3">
-                  <button
-                    type="button"
-                    title={audioPlaying ? 'Pausar audio' : 'Reproducir audio'}
-                    aria-label={audioPlaying ? 'Pausar audio' : 'Reproducir audio'}
-                    onClick={() => setAudioPlaying(!audioPlaying)}
-                    className="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-primary text-primary-foreground transition-transform hover:scale-105"
-                  >
-                    {audioPlaying ? <Pause size={14} /> : <Play size={14} fill="currentColor" />}
-                  </button>
-                  <div className="flex-1">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      Audio exclusivo
-                    </p>
-                    <div className="mt-1 h-1 w-full bg-border">
-                      <div className="h-full w-1/3 bg-primary transition-all" />
-                    </div>
-                    <p className="mt-1 text-[10px] text-muted-foreground">0:00 / 3:45</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-sm leading-[1.8] text-foreground/85">
-                {article.body.split('\n\n').map((paragraph, i) => (
-                  <p key={i} className="mb-4">{paragraph}</p>
-                ))}
-              </div>
+              <AudioNews src={article.audioUrl} />
+              <DescriptionNews description={article.body} />
               <div className="clear-both" />
             </div>
+
+            {articleVideos.length > 0 ? <VideoNews video={articleVideos} /> : null}
 
             <div className="mt-6 flex items-center gap-4 border-t border-border pt-4">
               <button

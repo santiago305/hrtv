@@ -240,8 +240,16 @@ export default function InputImages({
                                         playsInline
                                     />
                                 ) : item.kind === 'audio' ? (
-                                    <div className={`flex w-full items-center justify-center bg-muted/60 px-4 ${maxPreviewHeight}`}>
-                                        <audio src={item.url} controls className="w-full max-w-full" />
+                                    <div className={`flex w-full items-center gap-3 bg-muted/60 px-4 ${maxPreviewHeight}`}>
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
+                                            <FileAudio2 className="h-5 w-5" />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="h-1 w-full bg-border">
+                                                <div className="h-full w-1/3 bg-primary" />
+                                            </div>
+                                            <p className="mt-2 text-[11px] text-muted-foreground">Vista previa de audio</p>
+                                        </div>
                                     </div>
                                 ) : (
                                     <img
@@ -279,7 +287,7 @@ export default function InputImages({
                                         {item.kind === 'video'
                                             ? 'Vista previa de video'
                                             : item.kind === 'audio'
-                                              ? 'Vista previa de audio'
+                                              ? 'Archivo de audio'
                                               : 'Vista previa de imagen'}
                                     </p>
                                 </div>

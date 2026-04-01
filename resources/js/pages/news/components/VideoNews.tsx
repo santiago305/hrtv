@@ -56,7 +56,7 @@ export default function VideoNews({ className, video = [] }: VideoNewsProps) {
     return (
         <div
             className={clsx(
-                'news-video-player group relative mx-auto aspect-video w-full overflow-hidden',
+                'news-video-player group relative mx-auto aspect-video w-full overflow-hidden mt-5',
                 className,
             )}
             onMouseEnter={() => setIsHovered(true)}

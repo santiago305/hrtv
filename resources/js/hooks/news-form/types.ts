@@ -13,6 +13,7 @@ export type NewsFormPreview = {
     coverImage: string | null;
     imagePreviews: string[];
     videoPreviews: string[];
+    audioPreview: string | null;
 };
 
 export type NewsMediaState = {

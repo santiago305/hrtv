@@ -65,7 +65,7 @@ export default function CarouselNews({
     return (
         <div
             className={clsx(
-                'group relative mx-auto aspect-video w-full overflow-hidden',
+                'group relative mx-auto aspect-video w-full overflow-hidden mt-5',
                 className,
             )}
             onMouseEnter={() => setIsHovered(true)}
