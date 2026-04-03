@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\PublicNewsEngagementController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\UserController;
 use App\Models\Category;
@@ -148,6 +149,9 @@ Route::get('/noticias/{slug}', function (string $slug) use ($toPublicArticle) {
         'sidebarArticles' => $relatedArticles->map($toPublicArticle)->values(),
     ]);
 })->name('news.show');
+
+Route::post('/noticias/{news:slug}/views', [PublicNewsEngagementController::class, 'storeView'])->name('news.views.store');
+Route::post('/noticias/{news:slug}/likes', [PublicNewsEngagementController::class, 'storeLike'])->name('news.likes.store');
 
 Route::get('/radio', function () use ($toPublicArticle) {
     $latestRadioNews = News::query()

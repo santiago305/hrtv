@@ -1,8 +1,8 @@
-import { useState } from 'react';
 import { usePage } from '@inertiajs/react';
 import { Heart, Share2 } from 'lucide-react';
 import { AdPlaceholder } from '@/components/AdPlaceholder';
 import { NewsCard } from '@/components/NewsCard';
+import { useNewsEngagement } from '@/hooks/use-news-engagement';
 import PublicSiteLayout from '@/layouts/public-site-layout';
 import type { NewsArticle } from '@/types/news';
 import AudioNews from '../news/components/AudioNews';
@@ -19,10 +19,15 @@ type NewsDetailPageProps = {
 };
 
 export default function NewsDetailPage() {
-  const [liked, setLiked] = useState(false);
   const { article, sidebarArticles = [] } = usePage<NewsDetailPageProps>().props;
   const articleImages = article.images && article.images.length > 0 ? article.images : [article.image];
   const articleVideos = article.videoUrl ? [article.videoUrl] : [];
+  const { views, likes, hasLiked, likeSubmitting, like } = useNewsEngagement({
+    newsId: article.id,
+    newsSlug: article.slug,
+    initialViews: article.views,
+    initialLikes: article.likes,
+  });
 
   const formatCount = (n: number) => {
     if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
@@ -46,7 +51,7 @@ export default function NewsDetailPage() {
             </div>
 
             <TitleNews title={article.title} />
-            <NewsMeta authorName={article.author} publishedAt={article.publishedAt} viewsCount={article.views} />
+            <NewsMeta authorName={article.author} publishedAt={article.publishedAt} viewsCount={views} />
 
             <CarouselNews images={articleImages} />
 
@@ -63,15 +68,16 @@ export default function NewsDetailPage() {
             <div className="mt-6 flex items-center gap-4 border-t border-border pt-4">
               <button
                 type="button"
-                title={liked ? 'Quitar me gusta' : 'Dar me gusta'}
-                aria-label={liked ? 'Quitar me gusta' : 'Dar me gusta'}
-                onClick={() => setLiked(!liked)}
+                title={hasLiked ? 'Ya marcaste me gusta' : 'Dar me gusta'}
+                aria-label={hasLiked ? 'Ya marcaste me gusta' : 'Dar me gusta'}
+                onClick={() => void like()}
+                disabled={hasLiked || likeSubmitting}
                 className={`flex items-center gap-1.5 text-sm transition-colors ${
-                  liked ? 'text-accent' : 'text-muted-foreground hover:text-foreground'
+                  hasLiked ? 'text-accent' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <Heart size={16} fill={liked ? 'currentColor' : 'none'} />
-                <span>{formatCount(article.likes + (liked ? 1 : 0))}</span>
+                <Heart size={16} fill={hasLiked ? 'currentColor' : 'none'} />
+                <span>{formatCount(likes)}</span>
               </button>
               <button
                 type="button"
