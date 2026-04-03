@@ -2,8 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Category;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -48,6 +50,16 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => fn () => $request->user()?->loadMissing('role:id,name,slug'),
             ],
+            'footerCategories' => fn () => Category::query()
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn (Category $category) => [
+                    'id' => (string) $category->id,
+                    'name' => $category->name,
+                    'slug' => Str::slug($category->name),
+                ])
+                ->values(),
         ]);
     }
 }

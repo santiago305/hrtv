@@ -5,7 +5,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { hasRequiredRole } from '@/lib/authorization';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { FolderTree, LayoutGrid, Newspaper, Users } from 'lucide-react';
+import { FolderTree, LayoutGrid, Mail, Newspaper, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -30,6 +30,12 @@ const mainNavItems: NavItem[] = [
         title: 'Noticias',
         url: '/dashboard/news',
         icon: Newspaper,
+        allowedRoles: ['admin'],
+    },
+    {
+        title: 'Contactos',
+        url: '/dashboard/contact-messages',
+        icon: Mail,
         allowedRoles: ['admin'],
     },
 ];

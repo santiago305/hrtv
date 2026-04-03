@@ -643,7 +643,7 @@ export function DataTable<T extends Record<string, unknown>>({
                 </div>
             </div>
 
-            {pagination && onPageChange ? (
+            {pagination && onPageChange && pagination.total > pagination.limit ? (
                 <div className="mt-4 flex flex-col gap-3 rounded-xl border border-border bg-background px-4 py-3 sm:items-end sm:justify-between">      
                     <DataTablePagination
                         page={pagination.page}

@@ -3,16 +3,65 @@ import PublicSiteLayout from "@/layouts/public-site-layout";
 import { AdPlaceholder } from "@/components/AdPlaceholder";
 import { motion } from "framer-motion";
 
+const teamMembers = [
+  {
+    name: "Francisco Arturo Montes Chapilliquen",
+    role: "Jefe del Portal de Halcon TV y Radio",
+    description:
+      "lidera al equipo que trabaja en conjunto para ofrecer una experiencia de transmision excepcional.",
+  },
+  {
+    name: "Javier Angel Chininin Calderon",
+    role: "Productor General",
+    description:
+      "supervisa la calidad y coherencia de nuestra programacion.",
+  },
+  {
+    name: "Woody Marley Abad Morocho",
+    role: "Redaccion y edicion",
+    description:
+      "maneja la redaccion y edicion de contenidos.",
+  },
+  {
+    name: "Renato Ayosa Sandoval",
+    role: "Produccion audiovisual",
+    description:
+      "forma parte del equipo de produccion y es responsable de poner al aire los programas de television, ademas de los productos audiovisuales.",
+  },
+];
+
+const corporateValues = [
+  {
+    title: "Responsabilidad Civica",
+    desc:
+      "Reconocemos nuestro deber hacia la sociedad y el mundo en general, y actuamos de manera etica y responsable para contribuir positivamente.",
+  },
+  {
+    title: "Transparencia",
+    desc:
+      "Operamos con integridad y transparencia en todas nuestras acciones y comunicaciones.",
+  },
+  {
+    title: "Innovacion",
+    desc:
+      "Buscamos soluciones creativas y nuevas formas de abordar los desafios globales en busca de un mundo mejor.",
+  },
+  {
+    title: "Diversidad e igualdad",
+    desc:
+      "Valoramos la diversidad en todas sus formas y nos esforzamos por garantizar que todos tengan igualdad de oportunidades.",
+  },
+];
+
 const AboutPage: React.FC = () => {
   return (
-    <PublicSiteLayout title="Conócenos">
+    <PublicSiteLayout title="Conocenos">
       <div className="container-main py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Hero */}
           <div className="relative mb-12 overflow-hidden">
             <img
               src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=500&fit=crop"
@@ -21,8 +70,8 @@ const AboutPage: React.FC = () => {
             />
             <div className="absolute inset-0 bg-linear-to-t from-surface-alt/80 to-transparent" />
             <div className="absolute bottom-6 left-6">
-              <h1 className="text-2xl font-bold text-primary-foreground sm:text-3xl">Conócenos</h1>
-              <p className="mt-1 text-sm text-primary-foreground/70">El equipo detrás de HRTV</p>
+              <h1 className="text-2xl font-bold text-primary-foreground sm:text-3xl">Conocenos</h1>
+              <p className="mt-1 text-sm text-primary-foreground/70">El equipo detras de HRTV</p>
             </div>
           </div>
 
@@ -30,36 +79,53 @@ const AboutPage: React.FC = () => {
 
           <div className="mx-auto max-w-3xl space-y-8">
             <div className="space-y-4">
-              <h2 className="text-lg font-bold text-foreground">Nuestra Misión</h2>
+              <h2 className="text-lg font-bold text-foreground">Nuestro equipo</h2>
               <p className="text-sm leading-[1.8] text-foreground/80">
-                HRTV nació con una visión clara: ofrecer una mirada al mundo sin filtros ni
-                sesgos. Somos un equipo de periodistas, productores y tecnólogos comprometidos
-                con la verdad y la transparencia informativa.
-              </p>
-              <p className="text-sm leading-[1.8] text-foreground/80">
-                Desde nuestra fundación, hemos cubierto los eventos más importantes del
-                panorama nacional e internacional, llevando información verificada y
-                análisis profundo a millones de personas a través de nuestra plataforma
-                digital, radio y streaming en vivo.
+                Nuestro equipo trabaja en conjunto para ofrecer una experiencia de transmision
+                solida, cercana y coherente con la identidad de Halcon TV y Radio.
               </p>
             </div>
 
             <div className="border-l-2 border-primary pl-5">
-              <blockquote className="text-base italic text-foreground/70">
-                "Creemos que la información es poder, y nuestro deber es poner ese poder
-                en manos de cada ciudadano."
-              </blockquote>
-              <p className="mt-2 text-xs font-semibold text-muted-foreground">— Fundadores de HRTV</p>
+              <div className="space-y-4">
+                {teamMembers.map((member) => (
+                  <p key={member.name} className="text-sm leading-[1.8] text-foreground/80">
+                    <strong>{member.name}</strong>, como {member.role}, {member.description}
+                  </p>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-lg font-bold text-foreground">Nuestros Valores</h2>
-              <div className="grid gap-4 sm:grid-cols-3">
-                {[
-                  { title: "Verdad", desc: "Comprometidos con la verificación de hechos y la precisión informativa." },
-                  { title: "Innovación", desc: "Utilizamos la última tecnología para llevar las noticias de forma inmediata." },
-                  { title: "Transparencia", desc: "Nuestras fuentes y métodos están siempre abiertos al escrutinio público." },
-                ].map((value) => (
+              <h2 className="text-lg font-bold text-foreground">Mision y vision</h2>
+              <div className="space-y-5">
+                <div>
+                  <h3 className="text-sm font-bold text-primary">Mision</h3>
+                  <p className="mt-2 text-sm leading-[1.8] text-foreground/80">
+                    Proporcionar contenidos educativos, informativos y entretenidos que inspiren a
+                    la audiencia a tomar accion, fomentando asi un cambio positivo en la sociedad y
+                    promoviendo valores que fortalezcan el bienestar de todos, buscando siempre
+                    contribuir a un mundo mas saludable y enriquecedor para todos.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-bold text-primary">Vision</h3>
+                  <p className="mt-2 text-sm leading-[1.8] text-foreground/80">
+                    Liderar el camino hacia un mundo donde la busqueda del bienestar comun y el
+                    amor como principio rector sean la base de nuestras acciones. Enfocados en el
+                    deber civico y el enfoque geopolitico, aspiramos a crear sociedades mas
+                    saludables, culturalmente enriquecedoras y justas, donde cada individuo tenga la
+                    oportunidad de prosperar y contribuir al bienestar global.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h2 className="text-lg font-bold text-foreground">Nuestros valores corporativos</h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {corporateValues.map((value) => (
                   <div key={value.title} className="border border-border p-5">
                     <h3 className="text-sm font-bold text-primary">{value.title}</h3>
                     <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{value.desc}</p>
@@ -74,8 +140,8 @@ const AboutPage: React.FC = () => {
               <h2 className="text-lg font-bold text-foreground">Cobertura</h2>
               <div className="grid grid-cols-3 gap-4 text-center">
                 {[
-                  { num: "24/7", label: "Transmisión" },
-                  { num: "190+", label: "Países" },
+                  { num: "24/7", label: "Transmision" },
+                  { num: "190+", label: "Paises" },
                   { num: "2M+", label: "Lectores" },
                 ].map((stat) => (
                   <div key={stat.label} className="border border-border p-4">

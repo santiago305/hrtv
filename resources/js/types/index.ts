@@ -26,6 +26,11 @@ export interface SharedData {
     name: string;
     quote: { message: string; author: string };
     auth: Auth;
+    footerCategories?: Array<{
+        id: string;
+        name: string;
+        slug: string;
+    }>;
     flash?: {
         success?: string | null;
     };

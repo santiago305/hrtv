@@ -1,53 +1,47 @@
-import React, { useState } from "react";
+import React from "react";
 import { AdPlaceholder } from "@/components/AdPlaceholder";
 import { Send, Mail, User, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
-import { z } from "zod";
 import PublicSiteLayout from "@/layouts/public-site-layout";
+import { useForm, usePage } from "@inertiajs/react";
+import type { SharedData } from "@/types";
 
-const contactSchema = z.object({
-  name: z.string().trim().min(1, "El nombre es obligatorio").max(100),
-  email: z.string().trim().email("Correo electrónico inválido").max(255),
-  subject: z.string().trim().min(1, "El asunto es obligatorio").max(200),
-  message: z.string().trim().min(1, "El mensaje es obligatorio").max(2000),
-});
+type ContactFormData = {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+};
 
 const ContactPage: React.FC = () => {
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [sent, setSent] = useState(false);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" });
-  };
+  const { flash } = usePage<SharedData>().props;
+  const sent = Boolean(flash?.success);
+  const { data, setData, post, processing, errors } = useForm<ContactFormData>({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const result = contactSchema.safeParse(form);
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
-      result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as string;
-        fieldErrors[field] = issue.message;
-      });
-      setErrors(fieldErrors);
-      return;
-    }
-    setSent(true);
+
+    post(route("contact.store"), {
+      preserveScroll: true,
+    });
   };
 
   return (
-    <PublicSiteLayout title="Contáctanos - HRTV">
+    <PublicSiteLayout title="Contactanos - HRTV">
       <div className="container-main py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mx-auto max-w-2xl"
         >
-          <h1 className="text-2xl font-bold text-foreground">Contáctanos</h1>
+          <h1 className="text-2xl font-bold text-foreground">Contactanos</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            ¿Tienes una historia, comentario o sugerencia? Nos encantaría escucharte.
+            Tienes una historia, comentario o sugerencia? Nos encantaria escucharte.
           </p>
 
           <AdPlaceholder size="leaderboard" className="mt-6" />
@@ -73,8 +67,8 @@ const ContactPage: React.FC = () => {
                   <input
                     type="text"
                     name="name"
-                    value={form.name}
-                    onChange={handleChange}
+                    value={data.name}
+                    onChange={(event) => setData("name", event.target.value)}
                     className="w-full border border-border bg-background py-2.5 pl-9 pr-3 text-sm text-foreground outline-none transition-colors focus:border-primary"
                     placeholder="Tu nombre"
                   />
@@ -84,15 +78,15 @@ const ContactPage: React.FC = () => {
 
               <div>
                 <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Correo electrónico
+                  Correo electronico
                 </label>
                 <div className="relative">
                   <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input
                     type="email"
                     name="email"
-                    value={form.email}
-                    onChange={handleChange}
+                    value={data.email}
+                    onChange={(event) => setData("email", event.target.value)}
                     className="w-full border border-border bg-background py-2.5 pl-9 pr-3 text-sm text-foreground outline-none transition-colors focus:border-primary"
                     placeholder="tu@correo.com"
                   />
@@ -107,8 +101,8 @@ const ContactPage: React.FC = () => {
                 <input
                   type="text"
                   name="subject"
-                  value={form.subject}
-                  onChange={handleChange}
+                  value={data.subject}
+                  onChange={(event) => setData("subject", event.target.value)}
                   className="w-full border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus:border-primary"
                   placeholder="Asunto del mensaje"
                 />
@@ -123,8 +117,8 @@ const ContactPage: React.FC = () => {
                   <MessageSquare size={14} className="absolute left-3 top-3 text-muted-foreground" />
                   <textarea
                     name="message"
-                    value={form.message}
-                    onChange={handleChange}
+                    value={data.message}
+                    onChange={(event) => setData("message", event.target.value)}
                     rows={5}
                     className="w-full border border-border bg-background py-2.5 pl-9 pr-3 text-sm text-foreground outline-none transition-colors focus:border-primary"
                     placeholder="Escribe tu mensaje..."
@@ -135,10 +129,11 @@ const ContactPage: React.FC = () => {
 
               <button
                 type="submit"
-                className="flex items-center gap-2 bg-primary px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-primary-foreground transition-colors hover:bg-primary-hover"
+                disabled={processing}
+                className="flex items-center gap-2 bg-primary px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-60"
               >
                 <Send size={14} />
-                Enviar mensaje
+                {processing ? "Enviando..." : "Enviar mensaje"}
               </button>
             </form>
           )}

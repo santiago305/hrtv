@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PublicNewsEngagementController;
 use App\Http\Controllers\SubCategoryController;
@@ -171,9 +173,8 @@ Route::get('/conocenos', function () {
     return Inertia::render('conocenos');
 })->name('about');
 
-Route::get('/contacto', function () {
-    return Inertia::render('contacto');
-})->name('contact');
+Route::get('/contacto', [ContactController::class, 'index'])->name('contact');
+Route::post('/contacto', [ContactController::class, 'store'])->name('contact.store');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', function () {
@@ -244,6 +245,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('dashboard/news', [NewsController::class, 'store'])->name('dashboard.news.store');
         Route::patch('dashboard/news/{news:slug}', [NewsController::class, 'update'])->name('dashboard.news.update');
         Route::patch('dashboard/news/{news:slug}/toggle-status', [NewsController::class, 'toggleStatus'])->name('dashboard.news.toggle-status');
+        Route::get('dashboard/contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
     });
 });
 

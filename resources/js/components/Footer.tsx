@@ -1,5 +1,5 @@
-import { Link } from '@inertiajs/react';
-import { categories } from '@/data/mockData';
+import { Link, usePage } from '@inertiajs/react';
+import type { SharedData } from '@/types';
 
 interface FooterProps {
     logoUrl?: string;
@@ -7,10 +7,12 @@ interface FooterProps {
 
 export function Footer(logoUrl?: FooterProps) {
     const currentLogoUrl = logoUrl?.logoUrl ?? '/storage/logo.png';
+    const { footerCategories = [] } = usePage<SharedData>().props;
+
     return (
         <footer className="border-t border-border bg-surface-alt text-primary-foreground">
             <div className="container-main py-12">
-                <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                     <div className="space-y-3">
                         <div className="flex items-center gap-1.5">
                             <div className="flex h-15 w-15 items-center justify-center">
@@ -25,30 +27,14 @@ export function Footer(logoUrl?: FooterProps) {
 
                     <div className="space-y-3">
                         <h4 className="text-xs font-semibold uppercase tracking-wider text-primary-foreground/40">Categorias</h4>
-                        <ul className="space-y-1.5">
-                            {categories.slice(0, 6).map((cat) => (
+                        <ul className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+                            {footerCategories.map((cat) => (
                                 <li key={cat.id}>
                                     <Link
-                                        href={`/noticias?categoria=${cat.slug}`}
+                                        href={`${route('news.index')}?categoria=${cat.slug}`}
                                         className="text-sm text-primary-foreground/60 transition-colors hover:text-primary"
                                     >
                                         {cat.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    <div className="space-y-3">
-                        <h4 className="text-xs font-semibold uppercase tracking-wider text-primary-foreground/40">Popular</h4>
-                        <ul className="space-y-1.5">
-                            {categories.flatMap((c) => c.subcategories || []).slice(0, 6).map((sub) => (
-                                <li key={sub.id}>
-                                    <Link
-                                        href={`/noticias?subcategoria=${sub.slug}`}
-                                        className="text-sm text-primary-foreground/60 transition-colors hover:text-primary"
-                                    >
-                                        {sub.name}
                                     </Link>
                                 </li>
                             ))}
