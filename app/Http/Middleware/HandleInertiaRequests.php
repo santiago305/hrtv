@@ -47,6 +47,9 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
             ],
+            'app' => [
+                'debug' => config('app.debug'),
+            ],
             'auth' => [
                 'user' => fn () => $request->user()?->loadMissing('role:id,name,slug'),
             ],

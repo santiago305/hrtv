@@ -1,7 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import { Heart, Share2 } from 'lucide-react';
-import { AdPlaceholder } from '@/components/AdPlaceholder';
 import { NewsCard } from '@/components/NewsCard';
+import { PublicAdSlot } from '@/components/PublicAdSlot';
 import { useNewsEngagement } from '@/hooks/use-news-engagement';
 import PublicSiteLayout from '@/layouts/public-site-layout';
 import type { NewsArticle } from '@/types/news';
@@ -90,7 +90,7 @@ export default function NewsDetailPage() {
               </button>
             </div>
 
-            <AdPlaceholder size="leaderboard" className="mt-8" />
+            <PublicAdSlot slotCode="news_detail_leaderboard_bottom" size="leaderboard" className="mt-8" />
           </div>
 
           <aside className="space-y-6">
@@ -105,8 +105,8 @@ export default function NewsDetailPage() {
               </div>
             </div>
 
-            <AdPlaceholder size="rectangle" className="mx-auto" />
-            <AdPlaceholder size="rectangle" className="mx-auto" />
+            <PublicAdSlot slotCode="news_detail_rectangle_sidebar_top" size="rectangle" className="mx-auto" />
+            <PublicAdSlot slotCode="news_detail_rectangle_sidebar_bottom" size="rectangle" className="mx-auto" />
           </aside>
         </div>
       </article>

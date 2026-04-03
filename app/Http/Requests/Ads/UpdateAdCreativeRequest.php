@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Ads;
 
-use App\Models\AdSlot;
 use App\Models\Campaign;
 use App\Models\CampaignSlotTarget;
 use Illuminate\Validation\Rule;
@@ -14,7 +13,7 @@ class UpdateAdCreativeRequest extends StoreAdCreativeRequest
     {
         return [
             'campaign_id' => ['required', 'integer', Rule::exists(Campaign::class, 'id')],
-            'ad_slot_id' => ['required', 'integer', Rule::exists(AdSlot::class, 'id')],
+            'ad_slot_id' => ['required', 'integer', Rule::exists('ad_slots', 'id')],
             'title' => ['nullable', 'string', 'max:150'],
             'creative_file' => ['nullable', 'file', 'image', 'max:10240'],
             'target_url' => ['nullable', 'url', 'max:500'],
@@ -42,31 +41,8 @@ class UpdateAdCreativeRequest extends StoreAdCreativeRequest
                     }
                 }
 
-                if (! $this->hasFile('creative_file') || $slotId <= 0) {
-                    return;
-                }
-
-                $slot = AdSlot::query()->find($slotId);
-
-                if ($slot === null) {
-                    return;
-                }
-
-                $imageInfo = getimagesize($this->file('creative_file')->getRealPath());
-
-                if ($imageInfo === false) {
+                if ($this->hasFile('creative_file') && getimagesize($this->file('creative_file')->getRealPath()) === false) {
                     $validator->errors()->add('creative_file', 'No se pudieron leer las dimensiones de la imagen.');
-
-                    return;
-                }
-
-                [$width, $height] = $imageInfo;
-
-                if ((int) $width !== (int) $slot->banner_width || (int) $height !== (int) $slot->banner_height) {
-                    $validator->errors()->add(
-                        'creative_file',
-                        "La imagen debe medir {$slot->banner_width}x{$slot->banner_height} px para este espacio."
-                    );
                 }
             },
         ];

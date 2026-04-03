@@ -1,6 +1,6 @@
 import React from "react";
 import PublicSiteLayout from "@/layouts/public-site-layout";
-import { AdPlaceholder } from "@/components/AdPlaceholder";
+import { PublicAdSlot } from "@/components/PublicAdSlot";
 import { motion } from "framer-motion";
 
 const teamMembers = [
@@ -75,7 +75,7 @@ const AboutPage: React.FC = () => {
             </div>
           </div>
 
-          <AdPlaceholder size="leaderboard" className="mb-10" />
+          <PublicAdSlot slotCode="about_leaderboard_top" size="leaderboard" className="mb-10" />
 
           <div className="mx-auto max-w-3xl space-y-8">
             <div className="space-y-4">
@@ -134,7 +134,7 @@ const AboutPage: React.FC = () => {
               </div>
             </div>
 
-            <AdPlaceholder size="banner" />
+            <PublicAdSlot slotCode="about_banner_mid" size="banner" />
 
             <div className="space-y-4">
               <h2 className="text-lg font-bold text-foreground">Cobertura</h2>

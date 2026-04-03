@@ -66,6 +66,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             UserTestSeeder::class,
             ActualidadNewsSeeder::class,
+            AdvertisingDemoSeeder::class,
         ]);
     }
 }

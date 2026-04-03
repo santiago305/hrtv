@@ -25,6 +25,9 @@ export interface NavItem {
 export interface SharedData {
     name: string;
     quote: { message: string; author: string };
+    app?: {
+        debug?: boolean;
+    };
     auth: Auth;
     footerCategories?: Array<{
         id: string;

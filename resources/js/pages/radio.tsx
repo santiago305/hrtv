@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import PublicSiteLayout from "@/layouts/public-site-layout";
 import { NewsCard } from "@/components/NewsCard";
-import { AdPlaceholder } from "@/components/AdPlaceholder";
+import { PublicAdSlot } from "@/components/PublicAdSlot";
 import { Play, Pause, Volume2, Radio as RadioIcon } from "lucide-react";
 import { usePage } from "@inertiajs/react";
 import { type NewsArticle } from "@/types/news";
@@ -77,7 +77,7 @@ const RadioPage: React.FC = () => {
           </div>
         </div>
 
-        <AdPlaceholder size="leaderboard" className="mt-8" />
+        <PublicAdSlot slotCode="radio_leaderboard_top" size="leaderboard" className="mt-8" />
 
         {/* Latest news while listening */}
         <section className="mt-12">
@@ -91,7 +91,7 @@ const RadioPage: React.FC = () => {
           </div>
         </section>
 
-        <AdPlaceholder size="banner" className="mt-8" />
+        <PublicAdSlot slotCode="radio_banner_bottom" size="banner" className="mt-8" />
       </div>
     </PublicSiteLayout>
   );

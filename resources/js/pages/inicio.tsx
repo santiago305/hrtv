@@ -2,8 +2,8 @@ import { Link, usePage } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight, Play, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { AdPlaceholder } from '@/components/AdPlaceholder';
 import { NewsCard } from '@/components/NewsCard';
+import { PublicAdSlot } from '@/components/PublicAdSlot';
 import { mockLiveStreams } from '@/data/mockData';
 import PublicSiteLayout from '@/layouts/public-site-layout';
 import type { NewsArticle } from '@/types/news';
@@ -262,16 +262,16 @@ export default function Inicio() {
   return (
     <PublicSiteLayout title="Inicio">
       <HeroCarousel articles={latestNews} />
-      <AdPlaceholder size="leaderboard" className="container-main mt-6" />
+      <PublicAdSlot slotCode="home_leaderboard_top" size="leaderboard" className="container-main mt-6" />
       <LatestNewsSection articles={firstBlock} />
       <div className="container-main pb-6">
-        <AdPlaceholder size="banner" />
+        <PublicAdSlot slotCode="home_banner_mid" size="banner" />
       </div>
       <LiveStreamSection />
-      <AdPlaceholder size="leaderboard" className="container-main mt-6" />
+      <PublicAdSlot slotCode="home_leaderboard_bottom" size="leaderboard" className="container-main mt-6" />
       <MoreNewsSection articles={secondBlock} />
       <div className="container-main pb-12">
-        <AdPlaceholder size="banner" />
+        <PublicAdSlot slotCode="home_banner_bottom" size="banner" />
       </div>
     </PublicSiteLayout>
   );

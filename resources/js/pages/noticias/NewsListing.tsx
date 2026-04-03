@@ -1,7 +1,7 @@
 import { router, usePage } from '@inertiajs/react';
-import { AdPlaceholder } from '@/components/AdPlaceholder';
 import { NewsCard } from '@/components/NewsCard';
 import { Pagination } from '@/components/pagination/Pagination';
+import { PublicAdSlot } from '@/components/PublicAdSlot';
 import PublicSiteLayout from '@/layouts/public-site-layout';
 import type { NewsArticle, NewsCategory } from '@/types/news';
 import type { DataTablePaginationMeta } from '@/components/table/types';
@@ -123,7 +123,7 @@ export default function NewsListingPage() {
           </div>
         )}
 
-        <AdPlaceholder size="leaderboard" className="mb-8" />
+        <PublicAdSlot slotCode="news_list_leaderboard_top" size="leaderboard" className="mb-8" />
 
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
@@ -156,7 +156,7 @@ export default function NewsListingPage() {
           </div>
 
           <aside className="space-y-6">
-            <AdPlaceholder size="rectangle" className="mx-auto" />
+            <PublicAdSlot slotCode="news_list_rectangle_sidebar_top" size="rectangle" className="mx-auto" />
 
             <div className="border border-border p-4">
               <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -182,7 +182,7 @@ export default function NewsListingPage() {
               </ul>
             </div>
 
-            <AdPlaceholder size="rectangle" className="mx-auto" />
+            <PublicAdSlot slotCode="news_list_rectangle_sidebar_bottom" size="rectangle" className="mx-auto" />
           </aside>
         </div>
       </div>

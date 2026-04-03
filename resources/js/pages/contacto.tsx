@@ -1,8 +1,8 @@
 import React from "react";
-import { AdPlaceholder } from "@/components/AdPlaceholder";
 import { Send, Mail, User, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import PublicSiteLayout from "@/layouts/public-site-layout";
+import { PublicAdSlot } from "@/components/PublicAdSlot";
 import { useForm, usePage } from "@inertiajs/react";
 import type { SharedData } from "@/types";
 
@@ -44,7 +44,7 @@ const ContactPage: React.FC = () => {
             Tienes una historia, comentario o sugerencia? Nos encantaria escucharte.
           </p>
 
-          <AdPlaceholder size="leaderboard" className="mt-6" />
+          <PublicAdSlot slotCode="contact_leaderboard_top" size="leaderboard" className="mt-6" />
 
           {sent ? (
             <div className="mt-8 border border-primary/20 bg-primary/5 p-8 text-center">
@@ -138,7 +138,7 @@ const ContactPage: React.FC = () => {
             </form>
           )}
 
-          <AdPlaceholder size="banner" className="mt-10" />
+          <PublicAdSlot slotCode="contact_banner_bottom" size="banner" className="mt-10" />
         </motion.div>
       </div>
     </PublicSiteLayout>
