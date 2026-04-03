@@ -13,4 +13,8 @@ return [
         'videos_directory' => env('MEDIA_NEWS_VIDEOS_DIRECTORY', 'uploads/news/videos'),
         'audio_directory' => env('MEDIA_NEWS_AUDIO_DIRECTORY', 'uploads/news/audio'),
     ],
+
+    'ads' => [
+        'creatives_directory' => env('MEDIA_ADS_CREATIVES_DIRECTORY', 'uploads/ads/creatives'),
+    ],
 ];

@@ -1,0 +1,87 @@
+<?php
+
+namespace App\Http\Requests\Ads;
+
+use App\Models\AdSlot;
+use App\Models\Campaign;
+use App\Models\CampaignSlotTarget;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
+
+class StoreAdCreativeRequest extends FormRequest
+{
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'display_weight' => $this->filled('display_weight') ? (int) $this->input('display_weight') : 1,
+        ]);
+    }
+
+    public function authorize(): bool
+    {
+        return $this->user() !== null;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'campaign_id' => ['required', 'integer', Rule::exists(Campaign::class, 'id')],
+            'ad_slot_id' => ['required', 'integer', Rule::exists(AdSlot::class, 'id')],
+            'title' => ['nullable', 'string', 'max:150'],
+            'creative_file' => ['required', 'file', 'image', 'max:10240'],
+            'target_url' => ['nullable', 'url', 'max:500'],
+            'alt_text' => ['nullable', 'string', 'max:255'],
+            'display_weight' => ['required', 'integer', 'min:1', 'max:100'],
+        ];
+    }
+
+    public function after(): array
+    {
+        return [
+            function (Validator $validator): void {
+                $campaignId = $this->integer('campaign_id');
+                $slotId = $this->integer('ad_slot_id');
+
+                if ($campaignId > 0 && $slotId > 0) {
+                    $isTargeted = CampaignSlotTarget::query()
+                        ->where('campaign_id', $campaignId)
+                        ->where('ad_slot_id', $slotId)
+                        ->where('is_active', true)
+                        ->exists();
+
+                    if (! $isTargeted) {
+                        $validator->errors()->add('ad_slot_id', 'El espacio publicitario no esta asignado a la campana.');
+                    }
+                }
+
+                if (! $this->hasFile('creative_file') || $slotId <= 0) {
+                    return;
+                }
+
+                $slot = AdSlot::query()->find($slotId);
+
+                if ($slot === null) {
+                    return;
+                }
+
+                $imageInfo = getimagesize($this->file('creative_file')->getRealPath());
+
+                if ($imageInfo === false) {
+                    $validator->errors()->add('creative_file', 'No se pudieron leer las dimensiones de la imagen.');
+
+                    return;
+                }
+
+                [$width, $height] = $imageInfo;
+
+                if ((int) $width !== (int) $slot->banner_width || (int) $height !== (int) $slot->banner_height) {
+                    $validator->errors()->add(
+                        'creative_file',
+                        "La imagen debe medir {$slot->banner_width}x{$slot->banner_height} px para este espacio."
+                    );
+                }
+            },
+        ];
+    }
+}

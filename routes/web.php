@@ -1,9 +1,15 @@
 <?php
 
+use App\Http\Controllers\Admin\AdCreativeController;
+use App\Http\Controllers\Admin\AdvertiserController;
+use App\Http\Controllers\Admin\AdSlotController;
+use App\Http\Controllers\Admin\CampaignController;
+use App\Http\Controllers\AdvertisingController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\PublicAdController;
 use App\Http\Controllers\PublicNewsEngagementController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\UserController;
@@ -154,6 +160,8 @@ Route::get('/noticias/{slug}', function (string $slug) use ($toPublicArticle) {
 
 Route::post('/noticias/{news:slug}/views', [PublicNewsEngagementController::class, 'storeView'])->name('news.views.store');
 Route::post('/noticias/{news:slug}/likes', [PublicNewsEngagementController::class, 'storeLike'])->name('news.likes.store');
+Route::get('/ads/slots/{slotCode}', [PublicAdController::class, 'show'])->middleware('ad.slot')->name('ads.slots.show');
+Route::get('/ads/click/{adCreative}', [PublicAdController::class, 'click'])->name('ads.click');
 
 Route::get('/radio', function () use ($toPublicArticle) {
     $latestRadioNews = News::query()
@@ -246,6 +254,31 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('dashboard/news/{news:slug}', [NewsController::class, 'update'])->name('dashboard.news.update');
         Route::patch('dashboard/news/{news:slug}/toggle-status', [NewsController::class, 'toggleStatus'])->name('dashboard.news.toggle-status');
         Route::get('dashboard/contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
+        Route::get('dashboard/ads', [AdvertisingController::class, 'index'])->name('ads.dashboard');
+
+        Route::get('dashboard/advertisers', [AdvertiserController::class, 'index'])->name('advertisers.index');
+        Route::post('dashboard/advertisers', [AdvertiserController::class, 'store'])->name('advertisers.store');
+        Route::get('dashboard/advertisers/{advertiser}', [AdvertiserController::class, 'show'])->name('advertisers.show');
+        Route::patch('dashboard/advertisers/{advertiser}', [AdvertiserController::class, 'update'])->name('advertisers.update');
+        Route::patch('dashboard/advertisers/{advertiser}/toggle-status', [AdvertiserController::class, 'toggleStatus'])->name('advertisers.toggle-status');
+
+        Route::get('dashboard/ad-slots', [AdSlotController::class, 'index'])->name('ad-slots.index');
+        Route::post('dashboard/ad-slots', [AdSlotController::class, 'store'])->name('ad-slots.store');
+        Route::get('dashboard/ad-slots/{adSlot}', [AdSlotController::class, 'show'])->name('ad-slots.show');
+        Route::patch('dashboard/ad-slots/{adSlot}', [AdSlotController::class, 'update'])->name('ad-slots.update');
+        Route::patch('dashboard/ad-slots/{adSlot}/toggle-status', [AdSlotController::class, 'toggleStatus'])->name('ad-slots.toggle-status');
+
+        Route::get('dashboard/campaigns', [CampaignController::class, 'index'])->name('campaigns.index');
+        Route::post('dashboard/campaigns', [CampaignController::class, 'store'])->name('campaigns.store');
+        Route::get('dashboard/campaigns/{campaign}', [CampaignController::class, 'show'])->name('campaigns.show');
+        Route::patch('dashboard/campaigns/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update');
+        Route::patch('dashboard/campaigns/{campaign}/toggle-status', [CampaignController::class, 'toggleStatus'])->name('campaigns.toggle-status');
+
+        Route::get('dashboard/ad-creatives', [AdCreativeController::class, 'index'])->name('ad-creatives.index');
+        Route::post('dashboard/ad-creatives', [AdCreativeController::class, 'store'])->name('ad-creatives.store');
+        Route::get('dashboard/ad-creatives/{adCreative}', [AdCreativeController::class, 'show'])->name('ad-creatives.show');
+        Route::patch('dashboard/ad-creatives/{adCreative}', [AdCreativeController::class, 'update'])->name('ad-creatives.update');
+        Route::patch('dashboard/ad-creatives/{adCreative}/toggle-status', [AdCreativeController::class, 'toggleStatus'])->name('ad-creatives.toggle-status');
     });
 });
 
