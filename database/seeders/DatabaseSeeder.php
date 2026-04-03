@@ -64,6 +64,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             CategorySeeder::class,
+            UserTestSeeder::class,
+            ActualidadNewsSeeder::class,
         ]);
     }
 }

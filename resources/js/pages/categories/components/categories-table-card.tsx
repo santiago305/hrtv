@@ -1,5 +1,6 @@
 import { ActionsPopover, type ActionItem } from '@/components/ActionsPopover';
 import { DataTable } from '@/components/table/DataTable';
+import { useLocalPagination } from '@/components/pagination/use-local-pagination';
 import type { DataTableColumn } from '@/components/table/types';
 import { router } from '@inertiajs/react';
 import { Pencil, Power, PowerOff } from 'lucide-react';
@@ -10,6 +11,8 @@ import { CategoryUpdateModal } from './category-update-modal';
 type CategoriesTableCardProps = {
     categories: CategoryTableItem[];
 };
+
+const PAGE_LIMIT = 10;
 
 function buildActions(category: CategoryTableItem, onEdit: (category: CategoryTableItem) => void): ActionItem[] {
     return [
@@ -41,6 +44,10 @@ function buildActions(category: CategoryTableItem, onEdit: (category: CategoryTa
 export function CategoriesTableCard({ categories }: CategoriesTableCardProps) {
     const [selectedCategory, setSelectedCategory] = useState<CategoryTableItem | null>(null);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const { paginatedData, pagination, setPage } = useLocalPagination({
+        data: categories,
+        limit: PAGE_LIMIT,
+    });
 
     const columns: DataTableColumn<CategoryTableItem>[] = [
         {
@@ -124,13 +131,15 @@ export function CategoriesTableCard({ categories }: CategoriesTableCardProps) {
                 </div>
 
                 <DataTable
-                    data={categories}
+                    data={paginatedData}
                     columns={columns}
                     tableId="categories-dashboard-table"
                     showSearch
                     searchPlaceholder="Buscar categorias..."
                     rowKey={(category) => String(category.id)}
                     emptyMessage="No hay categorias creadas todavia."
+                    pagination={pagination}
+                    onPageChange={setPage}
                     striped
                     animated={false}
                     selectableColumns={false}

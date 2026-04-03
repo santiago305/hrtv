@@ -1,7 +1,7 @@
 import { router, usePage } from '@inertiajs/react';
 import { AdPlaceholder } from '@/components/AdPlaceholder';
 import { NewsCard } from '@/components/NewsCard';
-import { DataTablePagination } from '@/components/table/DataTablePagination';
+import { Pagination } from '@/components/pagination/Pagination';
 import PublicSiteLayout from '@/layouts/public-site-layout';
 import type { NewsArticle, NewsCategory } from '@/types/news';
 import type { DataTablePaginationMeta } from '@/components/table/types';
@@ -136,12 +136,16 @@ export default function NewsListingPage() {
                 </div>
 
                 {pagination.total > pagination.limit ? (
-                  <DataTablePagination
-                    page={pagination.page}
-                    limit={pagination.limit}
-                    total={pagination.total}
-                    onPageChange={handlePageChange}
-                  />
+                  <div className="mt-8 flex justify-center">
+                    <div className="w-full max-w-3xl flex justify-center">
+                      <Pagination
+                        page={pagination.page}
+                        limit={pagination.limit}
+                        total={pagination.total}
+                        onPageChange={handlePageChange}
+                      />
+                    </div>
+                  </div>
                 ) : null}
               </>
             ) : (

@@ -97,7 +97,7 @@ Route::get('/noticias/{page?}', function (?int $page = 1) use ($toPublicArticle)
         $newsQuery->whereHas('subCategory', fn ($query) => $query->whereRaw('LOWER(name) = ?', [strtolower(str_replace('-', ' ', $activeSubcategory))]));
     }
 
-    $news = $newsQuery->paginate(8, ['*'], 'page', $page);
+    $news = $newsQuery->paginate(10, ['*'], 'page', $page);
 
     return Inertia::render('noticias/NewsListing', [
         'categories' => $categories,
@@ -149,8 +149,18 @@ Route::get('/noticias/{slug}', function (string $slug) use ($toPublicArticle) {
     ]);
 })->name('news.show');
 
-Route::get('/radio', function () {
-    return Inertia::render('radio');
+Route::get('/radio', function () use ($toPublicArticle) {
+    $latestRadioNews = News::query()
+        ->with(['author:id,name', 'category:id,name', 'subCategory:id,name,category_id'])
+        ->where('is_published', true)
+        ->orderByDesc('published_at')
+        ->orderByDesc('id')
+        ->take(6)
+        ->get();
+
+    return Inertia::render('radio', [
+        'latestNews' => $latestRadioNews->map($toPublicArticle)->values(),
+    ]);
 })->name('radio');
 
 Route::get('/conocenos', function () {

@@ -2,11 +2,17 @@ import React, { useState } from "react";
 import PublicSiteLayout from "@/layouts/public-site-layout";
 import { NewsCard } from "@/components/NewsCard";
 import { AdPlaceholder } from "@/components/AdPlaceholder";
-import { mockArticles } from "@/data/mockData";
 import { Play, Pause, Volume2, Radio as RadioIcon } from "lucide-react";
+import { usePage } from "@inertiajs/react";
+import { type NewsArticle } from "@/types/news";
+
+type RadioPageProps = {
+  latestNews: NewsArticle[];
+};
 
 const RadioPage: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const { latestNews } = usePage<RadioPageProps>().props;
 
   return (
     <PublicSiteLayout title="HRTV Radio - Escucha nuestro noticiero en vivo">
@@ -79,7 +85,7 @@ const RadioPage: React.FC = () => {
             Noticias mientras escuchas
           </h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {mockArticles.slice(0, 6).map((article) => (
+            {latestNews.map((article) => (
               <NewsCard key={article.id} article={article} />
             ))}
           </div>

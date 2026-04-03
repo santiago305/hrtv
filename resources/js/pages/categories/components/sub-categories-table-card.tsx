@@ -1,5 +1,6 @@
 import { ActionsPopover, type ActionItem } from '@/components/ActionsPopover';
 import { DataTable } from '@/components/table/DataTable';
+import { useLocalPagination } from '@/components/pagination/use-local-pagination';
 import type { DataTableColumn } from '@/components/table/types';
 import { router } from '@inertiajs/react';
 import { Pencil, Power, PowerOff } from 'lucide-react';
@@ -11,6 +12,8 @@ type SubCategoriesTableCardProps = {
     subCategories: SubCategoryTableItem[];
     categoryOptions: CategoryOption[];
 };
+
+const PAGE_LIMIT = 10;
 
 function buildActions(subCategory: SubCategoryTableItem, onEdit: (subCategory: SubCategoryTableItem) => void): ActionItem[] {
     return [
@@ -42,6 +45,10 @@ function buildActions(subCategory: SubCategoryTableItem, onEdit: (subCategory: S
 export function SubCategoriesTableCard({ subCategories, categoryOptions }: SubCategoriesTableCardProps) {
     const [selectedSubCategory, setSelectedSubCategory] = useState<SubCategoryTableItem | null>(null);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const { paginatedData, pagination, setPage } = useLocalPagination({
+        data: subCategories,
+        limit: PAGE_LIMIT,
+    });
 
     const openEdit = (subCategory: SubCategoryTableItem) => {
         setSelectedSubCategory(subCategory);
@@ -122,13 +129,15 @@ export function SubCategoriesTableCard({ subCategories, categoryOptions }: SubCa
                 </div>
 
                 <DataTable
-                    data={subCategories}
+                    data={paginatedData}
                     columns={columns}
                     tableId="sub-categories-dashboard-table"
                     showSearch
                     searchPlaceholder="Buscar subcategorias..."
                     rowKey={(subCategory) => String(subCategory.id)}
                     emptyMessage="No hay subcategorias creadas todavia."
+                    pagination={pagination}
+                    onPageChange={setPage}
                     striped
                     animated={false}
                     selectableColumns={false}
