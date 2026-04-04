@@ -8,6 +8,8 @@ use App\Http\Requests\News\UpdateNewsRequest;
 use App\Models\Category;
 use App\Models\News;
 use App\Models\SubCategory;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -17,6 +19,8 @@ use Inertia\Response;
 
 class NewsController extends Controller
 {
+    private const DEFAULT_ENGAGEMENT_RANGE = '30d';
+
     public function index(Request $request): Response
     {
         $categories = Category::query()
@@ -30,6 +34,7 @@ class NewsController extends Controller
                 'author:id,name',
                 'category:id,name',
                 'subCategory:id,name,category_id',
+                'dailyEngagementStats' => fn ($query) => $query->where('date', '>=', now()->subDays(29)->toDateString())->orderBy('date'),
             ])
             ->latest()
             ->paginate(15)
@@ -68,6 +73,7 @@ class NewsController extends Controller
                 'author:id,name',
                 'category:id,name',
                 'subCategory:id,name,category_id',
+                'dailyEngagementStats' => fn ($query) => $query->where('date', '>=', now()->subDays(29)->toDateString())->orderBy('date'),
             ])
             ->latest()
             ->paginate(15)
@@ -194,6 +200,22 @@ class NewsController extends Controller
             ->with('success', $news->is_published ? 'Noticia activada correctamente.' : 'Noticia desactivada correctamente.');
     }
 
+    public function engagement(News $news, Request $request): JsonResponse
+    {
+        $range = $this->normalizeEngagementRange($request->string('range')->toString());
+        $days = $this->resolveRangeDays($range);
+
+        $news->load([
+            'dailyEngagementStats' => fn ($query) => $query
+                ->where('date', '>=', now()->subDays($days - 1)->toDateString())
+                ->orderBy('date'),
+        ]);
+
+        return response()->json([
+            'engagement' => $this->buildEngagementPayload($news, $range),
+        ]);
+    }
+
     /**
      * @param  array<int, UploadedFile>|UploadedFile|null  $files
      * @return array<int, string>
@@ -240,7 +262,52 @@ class NewsController extends Controller
                 'id' => $item->subCategory->id,
                 'name' => $item->subCategory->name,
             ] : null,
+            'engagement' => $this->buildEngagementPayload($item, self::DEFAULT_ENGAGEMENT_RANGE),
         ];
+    }
+
+    private function buildEngagementPayload(News $news, string $range): array
+    {
+        $series = $this->buildEngagementSeries($news->dailyEngagementStats, $this->resolveRangeDays($range));
+
+        return [
+            'range' => $range,
+            'daily' => $series,
+            'period_totals' => [
+                'views_count' => (int) $series->sum('views_count'),
+                'likes_count' => (int) $series->sum('likes_count'),
+            ],
+        ];
+    }
+
+    private function buildEngagementSeries(Collection $stats, int $days): Collection
+    {
+        return collect(range($days - 1, 0))
+            ->map(function (int $daysAgo) use ($stats) {
+                $date = now()->subDays($daysAgo)->toDateString();
+                $stat = $stats->first(fn ($dailyStat) => $dailyStat->date?->toDateString() === $date);
+
+                return [
+                    'date' => $date,
+                    'views_count' => $stat?->views_count ?? 0,
+                    'likes_count' => $stat?->likes_count ?? 0,
+                ];
+            })
+            ->values();
+    }
+
+    private function normalizeEngagementRange(string $range): string
+    {
+        return in_array($range, ['7d', '30d', '1y'], true) ? $range : self::DEFAULT_ENGAGEMENT_RANGE;
+    }
+
+    private function resolveRangeDays(string $range): int
+    {
+        return match ($range) {
+            '7d' => 7,
+            '1y' => 365,
+            default => 30,
+        };
     }
 
     private function transformEditorItem(News $news): array

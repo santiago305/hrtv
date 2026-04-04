@@ -18,6 +18,7 @@ class PublicNewsEngagementController extends Controller
 
         return response()->json([
             'counted' => $counted,
+            'reason' => $engagementService->lastResult(),
             'views' => $news->views_count,
             'likes' => $news->likes_count,
         ]);
@@ -32,6 +33,7 @@ class PublicNewsEngagementController extends Controller
 
         return response()->json([
             'counted' => $counted,
+            'reason' => $engagementService->lastResult(),
             'views' => $news->views_count,
             'likes' => $news->likes_count,
         ]);

@@ -16,6 +16,7 @@ type UseNewsEngagementParams = {
 
 type InteractionResponse = {
     counted: boolean;
+    reason?: string | null;
     views: number;
     likes: number;
 };
@@ -80,6 +81,13 @@ function getCsrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 }
 
+function mergeCounters(previous: Counters, incoming: InteractionResponse): Counters {
+    return {
+        views: Math.max(previous.views, incoming.views),
+        likes: Math.max(previous.likes, incoming.likes),
+    };
+}
+
 async function sendInteraction(url: string): Promise<InteractionResponse> {
     const response = await fetch(url, {
         method: 'POST',
@@ -96,7 +104,7 @@ async function sendInteraction(url: string): Promise<InteractionResponse> {
         throw new Error(`Failed with status ${response.status}`);
     }
 
-    return response.json() as Promise<InteractionResponse>;
+    return await response.json() as InteractionResponse;
 }
 
 export function useNewsEngagement({
@@ -131,10 +139,7 @@ export function useNewsEngagement({
 
         void sendInteraction(route('news.views.store', { news: newsSlug }))
             .then((result) => {
-                setCounters({
-                    views: result.views,
-                    likes: result.likes,
-                });
+                setCounters((previous) => mergeCounters(previous, result));
 
                 if (result.counted) {
                     markInteraction(newsId, 'view');
@@ -156,16 +161,12 @@ export function useNewsEngagement({
         try {
             const result = await sendInteraction(route('news.likes.store', { news: newsSlug }));
 
-            setCounters({
-                views: result.views,
-                likes: result.likes,
-            });
+            setCounters((previous) => mergeCounters(previous, result));
 
-            if (result.counted) {
-                markInteraction(newsId, 'like');
-            }
-
+            markInteraction(newsId, 'like');
             setHasLiked(true);
+        } catch {
+            // Mantiene el boton habilitado si la peticion falla para que el usuario pueda reintentar.
         } finally {
             setLikeSubmitting(false);
         }

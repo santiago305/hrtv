@@ -1,8 +1,10 @@
 import { router } from '@inertiajs/react';
 import { Pencil, Power, PowerOff } from 'lucide-react';
+import { useState } from 'react';
 import { ActionsPopover, type ActionItem } from '@/components/ActionsPopover';
 import { DataTable } from '@/components/table/DataTable';
 import type { DataTableColumn, DataTablePaginationMeta } from '@/components/table/types';
+import { NewsDetailModal } from './news-detail-modal';
 import type { NewsTableItem } from '../types';
 
 type NewsTableCardProps = {
@@ -10,14 +12,6 @@ type NewsTableCardProps = {
     pagination: DataTablePaginationMeta;
     onPageChange: (page: number) => void;
 };
-
-function formatCompactNumber(value: number) {
-    if (value >= 1000) {
-        return `${(value / 1000).toFixed(1)}k`;
-    }
-
-    return String(value);
-}
 
 function buildActions(item: NewsTableItem): ActionItem[] {
     return [
@@ -41,13 +35,14 @@ function buildActions(item: NewsTableItem): ActionItem[] {
             id: 'edit',
             label: 'Editar',
             icon: <Pencil className="h-4 w-4" />,
-            onClick: () =>
-                router.get(route('dashboard.news.edit', item.slug), {}, { preserveScroll: true }),
+            onClick: () => router.get(route('dashboard.news.edit', item.slug), {}, { preserveScroll: true }),
         },
     ];
 }
 
 export function NewsTableCard({ news, pagination, onPageChange }: NewsTableCardProps) {
+    const [selectedNews, setSelectedNews] = useState<NewsTableItem | null>(null);
+
     const columns: DataTableColumn<NewsTableItem>[] = [
         {
             id: 'title',
@@ -78,11 +73,11 @@ export function NewsTableCard({ news, pagination, onPageChange }: NewsTableCardP
             cell: (item) => <span className="text-muted-foreground">{item.author?.name ?? 'Sin autor'}</span>,
         },
         {
-            id: 'views_count',
-            header: 'Vistas',
+            id: 'likes_count',
+            header: 'Me gusta',
             searchable: false,
-            sortAccessor: (item) => item.views_count,
-            cell: (item) => <span className="text-muted-foreground">{formatCompactNumber(item.views_count)}</span>,
+            sortAccessor: (item) => item.likes_count,
+            cell: (item) => <span className="text-muted-foreground">{new Intl.NumberFormat('es-ES').format(item.likes_count)}</span>,
         },
         {
             id: 'status',
@@ -119,32 +114,37 @@ export function NewsTableCard({ news, pagination, onPageChange }: NewsTableCardP
     ];
 
     return (
-        <div className="rounded-sm border border-border bg-background p-5 sm:p-6">
-            <div className="mb-5 flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h2 className="text-base font-semibold text-foreground">Noticias registradas</h2>
-                    <p className="text-xs text-muted-foreground">Revisa las noticias creadas y gestiona su estado editorial.</p>
+        <>
+            <div className="rounded-sm border border-border bg-background p-5 sm:p-6">
+                <div className="mb-5 flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 className="text-base font-semibold text-foreground">Noticias registradas</h2>
+                        <p className="text-xs text-muted-foreground">Revisa las noticias creadas, abre su ficha tecnica y gestiona su estado editorial.</p>
+                    </div>
+
+                    <div className="inline-flex w-fit items-center rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+                        {pagination.total} registros
+                    </div>
                 </div>
 
-                <div className="inline-flex w-fit items-center rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
-                    {pagination.total} registros
-                </div>
+                <DataTable
+                    data={news}
+                    columns={columns}
+                    tableId="news-dashboard-table"
+                    showSearch
+                    searchPlaceholder="Buscar noticias..."
+                    rowKey={(item) => String(item.id)}
+                    emptyMessage="No hay noticias creadas todavia."
+                    striped
+                    animated={false}
+                    selectableColumns={false}
+                    pagination={pagination}
+                    onPageChange={onPageChange}
+                    onRowClick={(item) => setSelectedNews(item)}
+                />
             </div>
 
-            <DataTable
-                data={news}
-                columns={columns}
-                tableId="news-dashboard-table"
-                showSearch
-                searchPlaceholder="Buscar noticias..."
-                rowKey={(item) => String(item.id)}
-                emptyMessage="No hay noticias creadas todavia."
-                striped
-                animated={false}
-                selectableColumns={false}
-                pagination={pagination}
-                onPageChange={onPageChange}
-            />
-        </div>
+            <NewsDetailModal open={selectedNews !== null} item={selectedNews} onClose={() => setSelectedNews(null)} />
+        </>
     );
 }

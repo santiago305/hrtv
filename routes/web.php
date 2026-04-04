@@ -191,37 +191,61 @@ Route::middleware(['auth'])->group(function () {
                 'author:id,name',
                 'category:id,name',
                 'subCategory:id,name,category_id',
+                'dailyEngagementStats' => fn ($query) => $query->where('date', '>=', now()->subDays(29)->toDateString())->orderBy('date'),
             ])
             ->latest()
             ->paginate(15)
             ->withQueryString();
 
         return Inertia::render('dashboard', [
-            'news' => $news->getCollection()->map(fn (News $item) => [
-                'id' => $item->id,
-                'title' => $item->title,
-                'slug' => $item->slug,
-                'excerpt' => $item->excerpt,
-                'is_breaking' => $item->is_breaking,
-                'is_featured' => $item->is_featured,
-                'is_published' => $item->is_published,
-                'views_count' => $item->views_count,
-                'likes_count' => $item->likes_count,
-                'published_at' => $item->published_at?->toDateTimeString(),
-                'created_at' => $item->created_at?->toDateTimeString(),
-                'author' => $item->author ? [
-                    'id' => $item->author->id,
-                    'name' => $item->author->name,
-                ] : null,
-                'category' => $item->category ? [
-                    'id' => $item->category->id,
-                    'name' => $item->category->name,
-                ] : null,
-                'sub_category' => $item->subCategory ? [
-                    'id' => $item->subCategory->id,
-                    'name' => $item->subCategory->name,
-                ] : null,
-            ])->values(),
+            'news' => $news->getCollection()->map(function (News $item) {
+                $dailyStats = collect(range(29, 0))
+                    ->map(function (int $daysAgo) use ($item) {
+                        $date = now()->subDays($daysAgo)->toDateString();
+                        $stat = $item->dailyEngagementStats->first(fn ($dailyStat) => $dailyStat->date?->toDateString() === $date);
+
+                        return [
+                            'date' => $date,
+                            'views_count' => $stat?->views_count ?? 0,
+                            'likes_count' => $stat?->likes_count ?? 0,
+                        ];
+                    })
+                    ->values();
+
+                return [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'slug' => $item->slug,
+                    'excerpt' => $item->excerpt,
+                    'is_breaking' => $item->is_breaking,
+                    'is_featured' => $item->is_featured,
+                    'is_published' => $item->is_published,
+                    'views_count' => $item->views_count,
+                    'likes_count' => $item->likes_count,
+                    'published_at' => $item->published_at?->toDateTimeString(),
+                    'created_at' => $item->created_at?->toDateTimeString(),
+                    'author' => $item->author ? [
+                        'id' => $item->author->id,
+                        'name' => $item->author->name,
+                    ] : null,
+                    'category' => $item->category ? [
+                        'id' => $item->category->id,
+                        'name' => $item->category->name,
+                    ] : null,
+                    'sub_category' => $item->subCategory ? [
+                        'id' => $item->subCategory->id,
+                        'name' => $item->subCategory->name,
+                    ] : null,
+                    'engagement' => [
+                        'range' => '30d',
+                        'daily' => $dailyStats,
+                        'period_totals' => [
+                            'views_count' => (int) $dailyStats->sum('views_count'),
+                            'likes_count' => (int) $dailyStats->sum('likes_count'),
+                        ],
+                    ],
+                ];
+            })->values(),
             'newsPagination' => [
                 'page' => $news->currentPage(),
                 'limit' => $news->perPage(),
@@ -229,6 +253,8 @@ Route::middleware(['auth'])->group(function () {
             ],
         ]);
     })->name('dashboard');
+
+    Route::get('dashboard/news/{news}/engagement', [NewsController::class, 'engagement'])->name('dashboard.news.engagement');
 
     Route::middleware('role:admin')->group(function () {
         Route::get('dashboard/users', [UserController::class, 'index'])->name('users.index');

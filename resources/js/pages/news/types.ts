@@ -39,6 +39,18 @@ export type NewsTableItem = {
         id: number;
         name: string;
     } | null;
+    engagement: {
+        range: '7d' | '30d' | '1y';
+        daily: Array<{
+            date: string;
+            views_count: number;
+            likes_count: number;
+        }>;
+        period_totals: {
+            views_count: number;
+            likes_count: number;
+        };
+    };
 };
 
 export type NewsEditorItem = {
