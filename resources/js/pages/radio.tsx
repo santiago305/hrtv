@@ -13,9 +13,17 @@ type RadioPageProps = {
 const RadioPage: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const { latestNews } = usePage<RadioPageProps>().props;
+  const seoImage = latestNews[0]?.image ?? '/storage/logo.png';
 
   return (
-    <PublicSiteLayout title="HRTV Radio - Escucha nuestro noticiero en vivo">
+    <PublicSiteLayout
+      title="HRTV Radio | Escucha noticias en vivo"
+      description="Escucha HRTV Radio en vivo y mantente informado con noticias, actualidad y cobertura continua."
+      path="/radio"
+      image={seoImage}
+      type="website"
+      keywords={['radio en vivo', 'noticias', 'hrtv', 'peru']}
+    >
       <div className="container-main py-12">
         {/* Radio Hero */}
         <div className="relative overflow-hidden border border-primary/20 bg-surface-alt p-8 sm:p-12">

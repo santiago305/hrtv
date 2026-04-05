@@ -23,6 +23,7 @@ class NewsController extends Controller
 
     public function index(Request $request): Response
     {
+        $user = $request->user();
         $categories = Category::query()
             ->where('is_active', true)
             ->with(['subCategories' => fn ($query) => $query->where('is_active', true)->orderBy('name')])
@@ -30,6 +31,7 @@ class NewsController extends Controller
             ->get();
 
         $news = News::query()
+            ->visibleTo($user)
             ->with([
                 'author:id,name',
                 'category:id,name',
@@ -62,6 +64,8 @@ class NewsController extends Controller
 
     public function edit(News $news, Request $request): Response
     {
+        $this->ensureNewsIsVisibleTo($request, $news);
+
         $categories = Category::query()
             ->where('is_active', true)
             ->with(['subCategories' => fn ($query) => $query->where('is_active', true)->orderBy('name')])
@@ -69,6 +73,7 @@ class NewsController extends Controller
             ->get();
 
         $items = News::query()
+            ->visibleTo($request->user())
             ->with([
                 'author:id,name',
                 'category:id,name',
@@ -150,6 +155,8 @@ class NewsController extends Controller
 
     public function update(UpdateNewsRequest $request, News $news, UploadMediaAction $uploadMedia): RedirectResponse
     {
+        $this->ensureNewsIsVisibleTo($request, $news);
+
         $coverImagePath = $request->hasFile('cover_image')
             ? $uploadMedia->execute($request->file('cover_image'), config('media.news.covers_directory', 'uploads/news/covers'))
             : $news->cover_image;
@@ -189,8 +196,10 @@ class NewsController extends Controller
             ->with('success', 'Noticia actualizada correctamente.');
     }
 
-    public function toggleStatus(News $news): RedirectResponse
+    public function toggleStatus(News $news, Request $request): RedirectResponse
     {
+        $this->ensureNewsIsVisibleTo($request, $news);
+
         $news->update([
             'is_published' => ! $news->is_published,
         ]);
@@ -202,6 +211,8 @@ class NewsController extends Controller
 
     public function engagement(News $news, Request $request): JsonResponse
     {
+        $this->ensureNewsIsVisibleTo($request, $news);
+
         $range = $this->normalizeEngagementRange($request->string('range')->toString());
         $days = $this->resolveRangeDays($range);
 
@@ -344,5 +355,13 @@ class NewsController extends Controller
         }
 
         return Storage::disk(config('media.disk', 'public'))->url($path);
+    }
+
+    private function ensureNewsIsVisibleTo(Request $request, News $news): void
+    {
+        abort_unless(
+            $request->user() && News::query()->visibleTo($request->user())->whereKey($news->id)->exists(),
+            404
+        );
     }
 }

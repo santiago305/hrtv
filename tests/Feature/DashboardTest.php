@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -17,7 +18,14 @@ class DashboardTest extends TestCase
 
     public function test_authenticated_users_can_visit_the_dashboard()
     {
-        $this->actingAs($user = User::factory()->create());
+        $role = Role::query()->create([
+            'name' => 'Redactor',
+            'slug' => 'writer',
+        ]);
+
+        $this->actingAs(User::factory()->create([
+            'role_id' => $role->id,
+        ]));
 
         $this->get('/dashboard')->assertOk();
     }

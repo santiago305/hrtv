@@ -23,6 +23,27 @@ export default function NewsListingPage() {
   const activeSubcategory = props.activeSubcategory ?? '';
 
   const selectedCategory = categories.find((c) => c.slug === activeCategory);
+  const selectedSubcategory = selectedCategory?.subcategories?.find((sub) => sub.slug === activeSubcategory);
+  const seoTitle = selectedSubcategory
+    ? `${selectedSubcategory.name} | Noticias HRTV`
+    : selectedCategory
+      ? `${selectedCategory.name} | Noticias HRTV`
+      : 'Ultimas noticias | HRTV';
+  const seoDescription = selectedSubcategory
+    ? `Lee las ultimas noticias de ${selectedSubcategory.name} en HRTV. Cobertura actualizada y contenido informativo.`
+    : selectedCategory
+      ? `Lee las ultimas noticias de ${selectedCategory.name} en HRTV. Cobertura actualizada y contenido informativo.`
+      : 'Consulta las ultimas noticias, actualidad y coberturas informativas publicadas por HRTV.';
+  const seoPath = (() => {
+    const query = new URLSearchParams();
+    if (activeCategory) query.set('categoria', activeCategory);
+    if (activeSubcategory) query.set('subcategoria', activeSubcategory);
+
+    const search = query.toString();
+
+    return search ? `/noticias?${search}` : '/noticias';
+  })();
+  const seoImage = articles[0]?.image ?? '/storage/logo.png';
 
   const buildRoute = (page: number, params: Record<string, string> = {}) => {
     const query = new URLSearchParams(params).toString();
@@ -72,7 +93,14 @@ export default function NewsListingPage() {
   };
 
   return (
-    <PublicSiteLayout title="Noticias">
+    <PublicSiteLayout
+      title={seoTitle}
+      description={seoDescription}
+      path={seoPath}
+      image={seoImage}
+      type="website"
+      keywords={[selectedSubcategory?.name, selectedCategory?.name, 'noticias', 'hrtv'].filter(Boolean) as string[]}
+    >
       <div className="container-main py-8">
         <div className="mb-6 overflow-x-auto">
           <div className="flex items-center gap-1 pb-2">

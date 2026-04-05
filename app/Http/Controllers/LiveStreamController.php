@@ -7,6 +7,7 @@ use App\Http\Requests\LiveStreams\StoreLiveStreamRequest;
 use App\Http\Requests\LiveStreams\UpdateLiveStreamRequest;
 use App\Models\LiveStream;
 use App\Support\YoutubeUrl;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
@@ -173,6 +174,9 @@ class LiveStreamController extends Controller
             return $path;
         }
 
-        return Storage::disk(config('media.disk', 'public'))->url($path);
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk(config('media.disk', 'public'));
+
+        return $disk->url($path);
     }
 }

@@ -32,7 +32,14 @@ const ContactPage: React.FC = () => {
   };
 
   return (
-    <PublicSiteLayout title="Contactanos - HRTV">
+    <PublicSiteLayout
+      title="Contactanos | HRTV"
+      description="Contacta con HRTV para consultas, comentarios, sugerencias o cobertura informativa."
+      path="/contacto"
+      image="/storage/logo.png"
+      type="website"
+      keywords={['contacto', 'hrtv', 'noticias', 'medio']}
+    >
       <div className="container-main py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

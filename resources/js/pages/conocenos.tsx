@@ -55,7 +55,14 @@ const corporateValues = [
 
 const AboutPage: React.FC = () => {
   return (
-    <PublicSiteLayout title="Conocenos">
+    <PublicSiteLayout
+      title="Conocenos | HRTV"
+      description="Conoce al equipo, la mision, la vision y los valores corporativos de HRTV."
+      path="/conocenos"
+      image="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=500&fit=crop"
+      type="website"
+      keywords={['hrtv', 'equipo', 'medio de comunicacion', 'nosotros']}
+    >
       <div className="container-main py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

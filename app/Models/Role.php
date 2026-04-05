@@ -13,7 +13,8 @@ class Role extends Model
     public const HIERARCHY = [
         'admin' => 100,
         'moderator' => 50,
-        'writer' => 10,
+        'writer' => 20,
+        'streamer' => 10,
     ];
 
     protected $fillable = [

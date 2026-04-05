@@ -15,7 +15,7 @@ class EnsureUserHasRole
     {
         $user = $request->user();
 
-        abort_unless($user && $user->hasAnyRole($roles), Response::HTTP_FORBIDDEN);
+        abort_unless($user && $user->hasAnyRole($roles), Response::HTTP_NOT_FOUND);
 
         return $next($request);
     }

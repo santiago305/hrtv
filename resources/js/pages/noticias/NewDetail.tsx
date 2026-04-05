@@ -22,6 +22,31 @@ export default function NewsDetailPage() {
   const { article, sidebarArticles = [] } = usePage<NewsDetailPageProps>().props;
   const articleImages = article.images && article.images.length > 0 ? article.images : [article.image];
   const articleVideos = article.videoUrl ? [article.videoUrl] : [];
+  const canonicalPath = `/noticias/${article.slug}`;
+  const seoDescription = article.summary || `Lee la noticia completa sobre ${article.title} en HRTV.`;
+  const seoJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: article.title,
+    description: seoDescription,
+    image: [article.image],
+    datePublished: article.publishedAt,
+    dateModified: article.publishedAt,
+    author: {
+      '@type': 'Person',
+      name: article.author,
+    },
+    articleSection: article.category.name,
+    publisher: {
+      '@type': 'Organization',
+      name: 'HRTV',
+      logo: {
+        '@type': 'ImageObject',
+        url: '/storage/logo.png',
+      },
+    },
+    mainEntityOfPage: canonicalPath,
+  };
   const { views, likes, hasLiked, likeSubmitting, like } = useNewsEngagement({
     newsId: article.id,
     newsSlug: article.slug,
@@ -35,7 +60,18 @@ export default function NewsDetailPage() {
   };
 
   return (
-    <PublicSiteLayout title={article.title}>
+    <PublicSiteLayout
+      title={article.title}
+      description={seoDescription}
+      path={canonicalPath}
+      image={article.image}
+      type="article"
+      author={article.author}
+      publishedTime={article.publishedAt}
+      section={article.category.name}
+      keywords={[article.category.name, article.subcategory?.name, article.author, 'noticias', 'hrtv'].filter(Boolean) as string[]}
+      jsonLd={seoJsonLd}
+    >
       <article className="container-main py-8">
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">

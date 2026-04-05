@@ -13,6 +13,7 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         url: '/dashboard',
         icon: LayoutGrid,
+        allowedRoles: ['admin', 'moderator', 'writer'],
     },
     {
         title: 'Usuarios',
@@ -24,19 +25,19 @@ const mainNavItems: NavItem[] = [
         title: 'Categorias',
         url: '/dashboard/categories',
         icon: FolderTree,
-        allowedRoles: ['admin'],
+        allowedRoles: ['admin', 'moderator'],
     },
     {
         title: 'Noticias',
         url: '/dashboard/news',
         icon: Newspaper,
-        allowedRoles: ['admin'],
+        allowedRoles: ['admin', 'moderator', 'writer'],
     },
     {
         title: 'Transmisiones',
         url: '/dashboard/live-streams',
         icon: Radio,
-        allowedRoles: ['admin'],
+        allowedRoles: ['admin', 'moderator', 'streamer'],
     },
     {
         title: 'Publicidad',
@@ -57,6 +58,7 @@ const footerNavItems: NavItem[] = [];
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
     const visibleMainNavItems = mainNavItems.filter((item) => hasRequiredRole(auth.user, item.allowedRoles));
+    const homeUrl = auth.user?.role?.slug === 'streamer' ? '/dashboard/live-streams' : '/dashboard';
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -64,7 +66,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch>
+                            <Link href={homeUrl} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

@@ -287,9 +287,37 @@ export default function Inicio() {
   const { latestNews = [], featuredStream = null, previousStreams = [] } = usePage<InicioPageProps>().props;
   const firstBlock = latestNews.slice(0, 3);
   const secondBlock = latestNews.slice(3, 6);
+  const seoDescription = featuredStream?.summary
+    ? `${featuredStream.summary} Sigue las ultimas noticias y transmisiones en vivo de HRTV.`
+    : 'Ultimas noticias, coberturas especiales y transmisiones en vivo de HRTV.';
+  const seoImage = featuredStream?.thumbnailUrl ?? latestNews[0]?.image ?? '/storage/logo.png';
+  const seoTitle = featuredStream?.isLive ? 'HRTV en vivo y ultimas noticias' : 'HRTV | Noticias y transmisiones en vivo';
+  const seoJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'HRTV',
+    url: '/',
+    description: seoDescription,
+    publisher: {
+      '@type': 'Organization',
+      name: 'HRTV',
+      logo: {
+        '@type': 'ImageObject',
+        url: '/storage/logo.png',
+      },
+    },
+  };
 
   return (
-    <PublicSiteLayout title="Inicio">
+    <PublicSiteLayout
+      title={seoTitle}
+      description={seoDescription}
+      path="/"
+      image={seoImage}
+      type="website"
+      keywords={['noticias peru', 'noticias en vivo', 'streaming', 'hrtv']}
+      jsonLd={seoJsonLd}
+    >
       <HeroCarousel articles={latestNews} />
       <PublicAdSlot slotCode="home_leaderboard_top" size="leaderboard" className="container-main mt-6" />
       <LatestNewsSection articles={firstBlock} />

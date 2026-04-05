@@ -18,9 +18,11 @@ use App\Support\LiveStreams\LiveStreamPresenter;
 use App\Support\LiveStreams\LiveStreamQueryService;
 use App\Models\Category;
 use App\Models\News;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 $toPublicArticle = static function (News $item): array {
@@ -74,6 +76,35 @@ Route::get('/', function () use ($toPublicArticle) {
         'previousStreams' => $previousStreams->map(fn ($stream) => LiveStreamPresenter::publicItem($stream))->values(),
     ]);
 })->name('home');
+
+Route::get('/sitemap.xml', function () {
+    $baseUrl = rtrim(config('app.url'), '/');
+
+    $staticUrls = collect([
+        ['loc' => "{$baseUrl}/", 'changefreq' => 'hourly', 'priority' => '1.0', 'lastmod' => now()->toAtomString()],
+        ['loc' => "{$baseUrl}/noticias", 'changefreq' => 'hourly', 'priority' => '0.9', 'lastmod' => now()->toAtomString()],
+        ['loc' => "{$baseUrl}/radio", 'changefreq' => 'daily', 'priority' => '0.8', 'lastmod' => now()->toAtomString()],
+        ['loc' => "{$baseUrl}/conocenos", 'changefreq' => 'monthly', 'priority' => '0.6', 'lastmod' => now()->toAtomString()],
+        ['loc' => "{$baseUrl}/contacto", 'changefreq' => 'monthly', 'priority' => '0.5', 'lastmod' => now()->toAtomString()],
+    ]);
+
+    $newsUrls = News::query()
+        ->where('is_published', true)
+        ->orderByDesc('published_at')
+        ->get(['slug', 'updated_at', 'published_at'])
+        ->map(fn (News $item) => [
+            'loc' => "{$baseUrl}/noticias/{$item->slug}",
+            'changefreq' => 'weekly',
+            'priority' => '0.8',
+            'lastmod' => ($item->updated_at ?? $item->published_at ?? Carbon::now())->toAtomString(),
+        ]);
+
+    $urls = $staticUrls->concat($newsUrls);
+
+    $xml = view('sitemap', ['urls' => $urls])->render();
+
+    return response($xml, 200)->header('Content-Type', 'application/xml; charset=UTF-8');
+})->name('sitemap');
 
 Route::get('/noticias/{page?}', function (?int $page = 1) use ($toPublicArticle) {
     $page = max($page ?? 1, 1);
@@ -194,8 +225,10 @@ Route::get('/contacto', [ContactController::class, 'index'])->name('contact');
 Route::post('/contacto', [ContactController::class, 'store'])->name('contact.store');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('dashboard', function () {
+    Route::middleware('role:admin,moderator,writer')->group(function () {
+        Route::get('dashboard', function (Request $request) {
         $news = News::query()
+            ->visibleTo($request->user())
             ->with([
                 'author:id,name',
                 'category:id,name',
@@ -206,64 +239,65 @@ Route::middleware(['auth'])->group(function () {
             ->paginate(15)
             ->withQueryString();
 
-        return Inertia::render('dashboard', [
-            'news' => $news->getCollection()->map(function (News $item) {
-                $dailyStats = collect(range(29, 0))
-                    ->map(function (int $daysAgo) use ($item) {
-                        $date = now()->subDays($daysAgo)->toDateString();
-                        $stat = $item->dailyEngagementStats->first(fn ($dailyStat) => $dailyStat->date?->toDateString() === $date);
+            return Inertia::render('dashboard', [
+                'news' => $news->getCollection()->map(function (News $item) {
+                    $dailyStats = collect(range(29, 0))
+                        ->map(function (int $daysAgo) use ($item) {
+                            $date = now()->subDays($daysAgo)->toDateString();
+                            $stat = $item->dailyEngagementStats->first(fn ($dailyStat) => $dailyStat->date?->toDateString() === $date);
 
-                        return [
-                            'date' => $date,
-                            'views_count' => $stat?->views_count ?? 0,
-                            'likes_count' => $stat?->likes_count ?? 0,
-                        ];
-                    })
-                    ->values();
+                            return [
+                                'date' => $date,
+                                'views_count' => $stat?->views_count ?? 0,
+                                'likes_count' => $stat?->likes_count ?? 0,
+                            ];
+                        })
+                        ->values();
 
-                return [
-                    'id' => $item->id,
-                    'title' => $item->title,
-                    'slug' => $item->slug,
-                    'excerpt' => $item->excerpt,
-                    'is_breaking' => $item->is_breaking,
-                    'is_featured' => $item->is_featured,
-                    'is_published' => $item->is_published,
-                    'views_count' => $item->views_count,
-                    'likes_count' => $item->likes_count,
-                    'published_at' => $item->published_at?->toDateTimeString(),
-                    'created_at' => $item->created_at?->toDateTimeString(),
-                    'author' => $item->author ? [
-                        'id' => $item->author->id,
-                        'name' => $item->author->name,
-                    ] : null,
-                    'category' => $item->category ? [
-                        'id' => $item->category->id,
-                        'name' => $item->category->name,
-                    ] : null,
-                    'sub_category' => $item->subCategory ? [
-                        'id' => $item->subCategory->id,
-                        'name' => $item->subCategory->name,
-                    ] : null,
-                    'engagement' => [
-                        'range' => '30d',
-                        'daily' => $dailyStats,
-                        'period_totals' => [
-                            'views_count' => (int) $dailyStats->sum('views_count'),
-                            'likes_count' => (int) $dailyStats->sum('likes_count'),
+                    return [
+                        'id' => $item->id,
+                        'title' => $item->title,
+                        'slug' => $item->slug,
+                        'excerpt' => $item->excerpt,
+                        'is_breaking' => $item->is_breaking,
+                        'is_featured' => $item->is_featured,
+                        'is_published' => $item->is_published,
+                        'views_count' => $item->views_count,
+                        'likes_count' => $item->likes_count,
+                        'published_at' => $item->published_at?->toDateTimeString(),
+                        'created_at' => $item->created_at?->toDateTimeString(),
+                        'author' => $item->author ? [
+                            'id' => $item->author->id,
+                            'name' => $item->author->name,
+                        ] : null,
+                        'category' => $item->category ? [
+                            'id' => $item->category->id,
+                            'name' => $item->category->name,
+                        ] : null,
+                        'sub_category' => $item->subCategory ? [
+                            'id' => $item->subCategory->id,
+                            'name' => $item->subCategory->name,
+                        ] : null,
+                        'engagement' => [
+                            'range' => '30d',
+                            'daily' => $dailyStats,
+                            'period_totals' => [
+                                'views_count' => (int) $dailyStats->sum('views_count'),
+                                'likes_count' => (int) $dailyStats->sum('likes_count'),
+                            ],
                         ],
-                    ],
-                ];
-            })->values(),
-            'newsPagination' => [
-                'page' => $news->currentPage(),
-                'limit' => $news->perPage(),
-                'total' => $news->total(),
-            ],
-        ]);
-    })->name('dashboard');
+                    ];
+                })->values(),
+                'newsPagination' => [
+                    'page' => $news->currentPage(),
+                    'limit' => $news->perPage(),
+                    'total' => $news->total(),
+                ],
+            ]);
+        })->name('dashboard');
 
-    Route::get('dashboard/news/{news}/engagement', [NewsController::class, 'engagement'])->name('dashboard.news.engagement');
+        Route::get('dashboard/news/{news}/engagement', [NewsController::class, 'engagement'])->name('dashboard.news.engagement');
+    });
 
     Route::middleware('role:admin')->group(function () {
         Route::get('dashboard/users', [UserController::class, 'index'])->name('users.index');
@@ -271,28 +305,6 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('dashboard/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::patch('dashboard/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
 
-        Route::get('dashboard/categories', [CategoryController::class, 'index'])->name('categories.index');
-        Route::post('dashboard/categories', [CategoryController::class, 'store'])->name('categories.store');
-        Route::get('dashboard/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
-        Route::patch('dashboard/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
-        Route::patch('dashboard/categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
-
-        Route::get('dashboard/sub-categories', [SubCategoryController::class, 'index'])->name('sub-categories.index');
-        Route::post('dashboard/sub-categories', [SubCategoryController::class, 'store'])->name('sub-categories.store');
-        Route::get('dashboard/sub-categories/{subCategory}', [SubCategoryController::class, 'show'])->name('sub-categories.show');
-        Route::patch('dashboard/sub-categories/{subCategory}', [SubCategoryController::class, 'update'])->name('sub-categories.update');
-        Route::patch('dashboard/sub-categories/{subCategory}/toggle-status', [SubCategoryController::class, 'toggleStatus'])->name('sub-categories.toggle-status');
-
-        Route::get('dashboard/news', [NewsController::class, 'index'])->name('dashboard.news.index');
-        Route::get('dashboard/news/{news:slug}/edit', [NewsController::class, 'edit'])->name('dashboard.news.edit');
-        Route::post('dashboard/news', [NewsController::class, 'store'])->name('dashboard.news.store');
-        Route::patch('dashboard/news/{news:slug}', [NewsController::class, 'update'])->name('dashboard.news.update');
-        Route::patch('dashboard/news/{news:slug}/toggle-status', [NewsController::class, 'toggleStatus'])->name('dashboard.news.toggle-status');
-        Route::get('dashboard/live-streams', [LiveStreamController::class, 'index'])->name('live-streams.index');
-        Route::post('dashboard/live-streams', [LiveStreamController::class, 'store'])->name('live-streams.store');
-        Route::get('dashboard/live-streams/{liveStream}', [LiveStreamController::class, 'show'])->name('live-streams.show');
-        Route::patch('dashboard/live-streams/{liveStream}', [LiveStreamController::class, 'update'])->name('live-streams.update');
-        Route::patch('dashboard/live-streams/{liveStream}/toggle-status', [LiveStreamController::class, 'toggleStatus'])->name('live-streams.toggle-status');
         Route::get('dashboard/contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
         Route::get('dashboard/ads', [AdvertisingController::class, 'index'])->name('ads.dashboard');
 
@@ -319,6 +331,36 @@ Route::middleware(['auth'])->group(function () {
         Route::get('dashboard/ad-creatives/{adCreative}', [AdCreativeController::class, 'show'])->name('ad-creatives.show');
         Route::patch('dashboard/ad-creatives/{adCreative}', [AdCreativeController::class, 'update'])->name('ad-creatives.update');
         Route::patch('dashboard/ad-creatives/{adCreative}/toggle-status', [AdCreativeController::class, 'toggleStatus'])->name('ad-creatives.toggle-status');
+    });
+
+    Route::middleware('role:admin,moderator')->group(function () {
+        Route::get('dashboard/categories', [CategoryController::class, 'index'])->name('categories.index');
+        Route::post('dashboard/categories', [CategoryController::class, 'store'])->name('categories.store');
+        Route::get('dashboard/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+        Route::patch('dashboard/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+        Route::patch('dashboard/categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
+
+        Route::get('dashboard/sub-categories', [SubCategoryController::class, 'index'])->name('sub-categories.index');
+        Route::post('dashboard/sub-categories', [SubCategoryController::class, 'store'])->name('sub-categories.store');
+        Route::get('dashboard/sub-categories/{subCategory}', [SubCategoryController::class, 'show'])->name('sub-categories.show');
+        Route::patch('dashboard/sub-categories/{subCategory}', [SubCategoryController::class, 'update'])->name('sub-categories.update');
+        Route::patch('dashboard/sub-categories/{subCategory}/toggle-status', [SubCategoryController::class, 'toggleStatus'])->name('sub-categories.toggle-status');
+    });
+
+    Route::middleware('role:admin,moderator,writer')->group(function () {
+        Route::get('dashboard/news', [NewsController::class, 'index'])->name('dashboard.news.index');
+        Route::get('dashboard/news/{news:slug}/edit', [NewsController::class, 'edit'])->name('dashboard.news.edit');
+        Route::post('dashboard/news', [NewsController::class, 'store'])->name('dashboard.news.store');
+        Route::patch('dashboard/news/{news:slug}', [NewsController::class, 'update'])->name('dashboard.news.update');
+        Route::patch('dashboard/news/{news:slug}/toggle-status', [NewsController::class, 'toggleStatus'])->name('dashboard.news.toggle-status');
+    });
+
+    Route::middleware('role:admin,moderator,streamer')->group(function () {
+        Route::get('dashboard/live-streams', [LiveStreamController::class, 'index'])->name('live-streams.index');
+        Route::post('dashboard/live-streams', [LiveStreamController::class, 'store'])->name('live-streams.store');
+        Route::get('dashboard/live-streams/{liveStream}', [LiveStreamController::class, 'show'])->name('live-streams.show');
+        Route::patch('dashboard/live-streams/{liveStream}', [LiveStreamController::class, 'update'])->name('live-streams.update');
+        Route::patch('dashboard/live-streams/{liveStream}/toggle-status', [LiveStreamController::class, 'toggleStatus'])->name('live-streams.toggle-status');
     });
 });
 
