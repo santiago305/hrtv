@@ -8,11 +8,14 @@ use App\Http\Controllers\AdvertisingController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ContactMessageController;
+use App\Http\Controllers\LiveStreamController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PublicAdController;
 use App\Http\Controllers\PublicNewsEngagementController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\UserController;
+use App\Support\LiveStreams\LiveStreamPresenter;
+use App\Support\LiveStreams\LiveStreamQueryService;
 use App\Models\Category;
 use App\Models\News;
 use Illuminate\Support\Facades\Route;
@@ -61,8 +64,14 @@ Route::get('/', function () use ($toPublicArticle) {
         ->take(6)
         ->get();
 
+    $liveStreams = app(LiveStreamQueryService::class);
+    $currentStream = $liveStreams->current();
+    $previousStreams = $liveStreams->previous($currentStream?->id, 6);
+
     return Inertia::render('inicio', [
         'latestNews' => $latestNews->map($toPublicArticle)->values(),
+        'featuredStream' => $currentStream ? LiveStreamPresenter::publicItem($currentStream) : null,
+        'previousStreams' => $previousStreams->map(fn ($stream) => LiveStreamPresenter::publicItem($stream))->values(),
     ]);
 })->name('home');
 
@@ -279,6 +288,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('dashboard/news', [NewsController::class, 'store'])->name('dashboard.news.store');
         Route::patch('dashboard/news/{news:slug}', [NewsController::class, 'update'])->name('dashboard.news.update');
         Route::patch('dashboard/news/{news:slug}/toggle-status', [NewsController::class, 'toggleStatus'])->name('dashboard.news.toggle-status');
+        Route::get('dashboard/live-streams', [LiveStreamController::class, 'index'])->name('live-streams.index');
+        Route::post('dashboard/live-streams', [LiveStreamController::class, 'store'])->name('live-streams.store');
+        Route::get('dashboard/live-streams/{liveStream}', [LiveStreamController::class, 'show'])->name('live-streams.show');
+        Route::patch('dashboard/live-streams/{liveStream}', [LiveStreamController::class, 'update'])->name('live-streams.update');
+        Route::patch('dashboard/live-streams/{liveStream}/toggle-status', [LiveStreamController::class, 'toggleStatus'])->name('live-streams.toggle-status');
         Route::get('dashboard/contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
         Route::get('dashboard/ads', [AdvertisingController::class, 'index'])->name('ads.dashboard');
 
@@ -310,3 +324,4 @@ Route::middleware(['auth'])->group(function () {
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
+

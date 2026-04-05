@@ -33,14 +33,21 @@ export interface NewsArticle {
   isLive?: boolean;
 }
 
-export interface LiveStream {
+export interface PublicLiveStream {
   id: string;
   title: string;
-  thumbnailUrl: string;
-  videoUrl: string;
+  slug: string;
+  summary: string;
+  description?: string | null;
+  status: 'draft' | 'scheduled' | 'live' | 'ended';
   isLive: boolean;
-  viewers?: number;
-  startedAt?: string;
+  youtubeUrl?: string | null;
+  youtubeVideoId?: string | null;
+  embedUrl?: string | null;
+  thumbnailUrl?: string | null;
+  scheduledAt?: string | null;
+  startedAt?: string | null;
+  endedAt?: string | null;
 }
 
 export interface NavItem {

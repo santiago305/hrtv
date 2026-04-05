@@ -1,12 +1,11 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight, Play, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { NewsCard } from '@/components/NewsCard';
 import { PublicAdSlot } from '@/components/PublicAdSlot';
-import { mockLiveStreams } from '@/data/mockData';
 import PublicSiteLayout from '@/layouts/public-site-layout';
-import type { NewsArticle } from '@/types/news';
+import type { NewsArticle, PublicLiveStream } from '@/types/news';
 
 interface InicioProps {
     logoUrl?: string;
@@ -14,6 +13,8 @@ interface InicioProps {
 
 type InicioPageProps = {
     latestNews: NewsArticle[];
+    featuredStream: PublicLiveStream | null;
+    previousStreams: PublicLiveStream[];
 };
 
 function HeroCarousel({ logoUrl, articles }: InicioProps & { articles: NewsArticle[] }) {
@@ -161,77 +162,105 @@ function LatestNewsSection({ articles }: { articles: NewsArticle[] }) {
   );
 }
 
-function LiveStreamSection() {
-  const mainStream = mockLiveStreams[0];
-  const otherStreams = mockLiveStreams.slice(1);
+function formatStreamDate(stream: PublicLiveStream) {
+  const source = stream.isLive ? stream.startedAt : stream.endedAt ?? stream.scheduledAt;
+
+  if (!source) {
+    return 'Sin fecha confirmada';
+  }
+
+  return new Intl.DateTimeFormat('es-CO', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(source));
+}
+
+function LiveStreamSection({ featuredStream, previousStreams }: { featuredStream: PublicLiveStream | null; previousStreams: PublicLiveStream[] }) {
+  const streams = useMemo(() => {
+    if (!featuredStream) {
+      return previousStreams;
+    }
+
+    return [featuredStream, ...previousStreams];
+  }, [featuredStream, previousStreams]);
+  const [selectedStreamId, setSelectedStreamId] = useState<string | null>(featuredStream?.id ?? previousStreams[0]?.id ?? null);
+
+  useEffect(() => {
+    setSelectedStreamId(featuredStream?.id ?? previousStreams[0]?.id ?? null);
+  }, [featuredStream?.id, previousStreams]);
+
+  const selectedStream = streams.find((stream) => stream.id === selectedStreamId) ?? featuredStream ?? previousStreams[0] ?? null;
+  const sidebarStreams = streams.filter((stream) => stream.id !== selectedStream?.id);
+
+  if (!selectedStream) {
+    return null;
+  }
 
   return (
     <section className="bg-surface-alt py-12">
       <div className="container-main">
         <div className="mb-6 flex items-center gap-3">
-          <div className="flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 animate-pulse-live rounded-full bg-accent" />
-            <h2 className="text-lg font-bold text-primary-foreground">Streaming</h2>
+          <div className="flex items-center gap-2">
+            <span className={`inline-block h-2 w-2 rounded-full ${selectedStream.isLive ? 'animate-pulse-live bg-accent' : 'bg-primary'}`} />
+            <h2 className="text-lg font-bold text-primary-foreground">{selectedStream.isLive ? 'En vivo ahora' : 'Ultima transmision'}</h2>
           </div>
         </div>
 
         <div className="grid gap-5 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <div className="relative aspect-video overflow-hidden border border-primary/20 bg-surface-alt">
-              <img src={mainStream.thumbnailUrl} alt={mainStream.title} className="h-full w-full object-cover" />
-              <div className="absolute inset-0 flex items-center justify-center bg-surface-alt/40">
-                <button
-                  type="button"
-                  title={`Reproducir ${mainStream.title}`}
-                  aria-label={`Reproducir ${mainStream.title}`}
-                  className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-primary-foreground/40 bg-primary/80 text-primary-foreground transition-transform hover:scale-110"
-                >
-                  <Play size={20} fill="currentColor" />
-                </button>
-              </div>
-              {mainStream.isLive && (
-                <div className="absolute left-3 top-3 flex items-center gap-1.5 bg-accent px-2 py-0.5">
-                  <span className="inline-block h-1.5 w-1.5 animate-pulse-live rounded-full bg-accent-foreground" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-accent-foreground">
-                    En Vivo
-                  </span>
-                </div>
-              )}
-              {mainStream.viewers && (
-                <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-surface-alt/80 px-2 py-1 backdrop-blur-sm">
-                  <Users size={12} className="text-primary-foreground/70" />
-                  <span className="text-[10px] font-medium text-primary-foreground/70">
-                    {mainStream.viewers.toLocaleString()}
-                  </span>
-                </div>
+          <div className="space-y-4 lg:col-span-2">
+            <div className="overflow-hidden border border-primary/20 bg-black">
+              {selectedStream.embedUrl ? (
+                <iframe
+                  className="aspect-video w-full"
+                  src={selectedStream.embedUrl}
+                  title={selectedStream.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              ) : selectedStream.thumbnailUrl ? (
+                <img src={selectedStream.thumbnailUrl} alt={selectedStream.title} className="aspect-video w-full object-cover" />
+              ) : (
+                <div className="flex aspect-video items-center justify-center text-sm text-primary-foreground/70">Sin video disponible</div>
               )}
             </div>
-            <h3 className="mt-3 text-sm font-bold text-primary-foreground">{mainStream.title}</h3>
+
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] ${selectedStream.isLive ? 'bg-accent text-accent-foreground' : 'bg-primary/15 text-primary-foreground'}`}>
+                  {selectedStream.isLive ? 'En vivo' : 'Archivo'}
+                </span>
+                <span className="text-xs uppercase tracking-[0.2em] text-primary-foreground/45">{formatStreamDate(selectedStream)}</span>
+              </div>
+
+              <h3 className="text-lg font-bold text-primary-foreground">{selectedStream.title}</h3>
+              {selectedStream.summary && <p className="text-sm leading-relaxed text-primary-foreground/70">{selectedStream.summary}</p>}
+            </div>
           </div>
 
           <div className="space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-primary-foreground/40">
-              Videos anteriores
-            </h3>
-            {otherStreams.map((stream) => (
-              <div key={stream.id} className="group flex cursor-pointer gap-3">
-                <div className="relative h-16 w-28 shrink-0 overflow-hidden">
-                  <img
-                    src={stream.thumbnailUrl}
-                    alt={stream.title}
-                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-surface-alt/30 opacity-0 transition-opacity group-hover:opacity-100">
-                    <Play size={14} className="text-primary-foreground" fill="currentColor" />
-                  </div>
-                </div>
-                <div className="flex flex-col justify-center">
-                  <h4 className="line-clamp-2 text-xs font-semibold text-primary-foreground transition-colors group-hover:text-primary">
-                    {stream.title}
-                  </h4>
-                </div>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-primary-foreground/40">Transmisiones anteriores</h3>
+            {sidebarStreams.length === 0 ? (
+              <div className="border border-primary-foreground/10 bg-surface-alt/50 p-4 text-xs text-primary-foreground/60">
+                Aun no hay historial de transmisiones para mostrar.
               </div>
-            ))}
+            ) : (
+              sidebarStreams.map((stream) => (
+                <button key={stream.id} type="button" onClick={() => setSelectedStreamId(stream.id)} className="group flex w-full gap-3 text-left">
+                  <div className="relative h-16 w-28 shrink-0 overflow-hidden border border-primary-foreground/10">
+                    {stream.thumbnailUrl ? (
+                      <img src={stream.thumbnailUrl} alt={stream.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-black text-[10px] text-primary-foreground/60">Sin miniatura</div>
+                    )}
+                    {stream.isLive && <span className="absolute left-2 top-2 inline-block h-2 w-2 animate-pulse-live rounded-full bg-accent" />}
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col justify-center">
+                    <h4 className="line-clamp-2 text-xs font-semibold text-primary-foreground transition-colors group-hover:text-primary">{stream.title}</h4>
+                    <span className="mt-1 text-[10px] uppercase tracking-[0.18em] text-primary-foreground/40">{formatStreamDate(stream)}</span>
+                  </div>
+                </button>
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -255,7 +284,7 @@ function MoreNewsSection({ articles }: { articles: NewsArticle[] }) {
 }
 
 export default function Inicio() {
-  const { latestNews = [] } = usePage<InicioPageProps>().props;
+  const { latestNews = [], featuredStream = null, previousStreams = [] } = usePage<InicioPageProps>().props;
   const firstBlock = latestNews.slice(0, 3);
   const secondBlock = latestNews.slice(3, 6);
 
@@ -267,7 +296,7 @@ export default function Inicio() {
       <div className="container-main pb-6">
         <PublicAdSlot slotCode="home_banner_mid" size="banner" />
       </div>
-      <LiveStreamSection />
+      <LiveStreamSection featuredStream={featuredStream} previousStreams={previousStreams} />
       <PublicAdSlot slotCode="home_leaderboard_bottom" size="leaderboard" className="container-main mt-6" />
       <MoreNewsSection articles={secondBlock} />
       <div className="container-main pb-12">
